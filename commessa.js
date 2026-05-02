@@ -43,3 +43,4 @@ console.log("Margine (%):", risultato.marginePercentuale + "%");
 console.log("Scostamento budget (€):", risultato.scostamentoEuro);
 console.log("Scostamento budget (%):", risultato.scostamentoPercentuale + "%");
 console.log("CPI:", risultato.cpi);
+module.exports = { analizzaCommessa };

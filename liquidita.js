@@ -52,3 +52,4 @@ console.log("DPO (giorni medi pagamento fornitori):", risultato.dpo, "giorni");
 console.log("Delta DSO-DPO:", risultato.deltaDsoDpo, "giorni");
 console.log("CCN (Capitale Circolante Netto):", risultato.ccn, "€");
 console.log("Current Ratio:", risultato.currentRatio);
+module.exports = { analizzaLiquidita };

@@ -64,3 +64,4 @@ console.log("EBITDA Margin:", risultato.ebitdaMargin, "%");
 console.log("Incidenza costo lavoro:", risultato.incidenzaCostoLavoro, "%");
 console.log("Rapporto subappalto/fatturato:", risultato.rapportoSubappalto, "%");
 // console.log("ROI:", risultato.roi, "%");   // PLACEHOLDER — da attivare con input dinamico
+module.exports = { analizzaPerformance };
