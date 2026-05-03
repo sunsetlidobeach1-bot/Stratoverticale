@@ -1,15 +1,7 @@
 {
-  "_nota": "Sostituisci questi numeri con i dati reali dell'azienda da analizzare. Tutti i valori in euro.",
-
-  "commessa": {
-    "nome": "Ristrutturazione Via Roma 12",
-    "ricavi": 80000,
-    "costiDiretti": 55000,
-    "budgetPrevisto": 50000,
-    "salEmessi": 40000
-  },
-
   "azienda": {
+    "nome": "Edil Esempio Srl",
+    "periodoRiferimento": "annuale",
     "fatturato": 500000,
     "acquisti": 200000,
     "creditiClienti": 120000,
@@ -17,7 +9,13 @@
     "attivitaCorrenti": 180000,
     "passivitaCorrenti": 160000,
     "costoLavoro": 140000,
-    "costoSubappalti": 120000,
+    "costoSubappalti": 60000,
     "altriCostiOperativi": 5000
+  },
+  "commessa": {
+    "nome": "Ristrutturazione Via Roma 12",
+    "valoreContratto": 80000,
+    "costiDiretti": 55000,
+    "salEmessi": 40000
   }
 }

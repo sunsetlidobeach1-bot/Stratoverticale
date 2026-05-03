@@ -1,16 +1,5 @@
 // StratoVerticale — Modulo Benchmark Settoriale
-// Versione 0.1 — Prima bozza
-// Sessione 4 — 2 maggio 2026
-//
-// LEGENDA AFFIDABILITÀ:
-//   ✅ VERIFICATO   — fonte primaria citata
-//   ⚠️ INFERENZA    — ragionamento fondato, non ancora verificato da fonte primaria
-//   ❌ PLACEHOLDER  — dato mancante, da aggiornare
-//
-// FONTI:
-//   - FNC Osservatorio Bilanci Focus Costruzioni, marzo 2026
-//   - Allianz Trade — DSO per settore
-//   - iCRIBIS — DSO settore costruzioni
+// Versione 0.2 — Sessione 5 — 3 maggio 2026
 
 const benchmarkEdilizia = {
 
@@ -70,40 +59,35 @@ const benchmarkEdilizia = {
 };
 
 function confrontaBenchmark(risultatoLiquidita, risultatoPerformance) {
-  const confronto = {};
+  const righe = [];
 
-  // DSO
   const dso = parseFloat(risultatoLiquidita.dso);
   if (dso <= benchmarkEdilizia.dso.mediaSettore) {
-    confronto.dso = { valore: dso, stato: "BUONO", messaggio: `DSO di ${dso} giorni — sotto la media di settore (${benchmarkEdilizia.dso.mediaSettore} giorni)` };
+    righe.push(`✅  DSO [BUONO] — ${dso} giorni, sotto la media settore (${benchmarkEdilizia.dso.mediaSettore})`);
   } else if (dso <= benchmarkEdilizia.dso.sogliaAttenzione) {
-    confronto.dso = { valore: dso, stato: "ATTENZIONE", messaggio: `DSO di ${dso} giorni — sopra la media di settore (${benchmarkEdilizia.dso.mediaSettore} giorni)` };
-  } else if (dso <= benchmarkEdilizia.dso.sogliaAllarme) {
-    confronto.dso = { valore: dso, stato: "CRITICO", messaggio: `DSO di ${dso} giorni — soglia critica superata` };
+    righe.push(`⚠️  DSO [ATTENZIONE] — ${dso} giorni, sopra media settore (${benchmarkEdilizia.dso.mediaSettore})`);
   } else {
-    confronto.dso = { valore: dso, stato: "ALLARME", messaggio: `DSO di ${dso} giorni — rischio liquidità elevato` };
+    righe.push(`❌  DSO [CRITICO] — ${dso} giorni, soglia critica superata`);
   }
 
-  // Current Ratio
   const cr = parseFloat(risultatoLiquidita.currentRatio);
   if (cr >= benchmarkEdilizia.currentRatio.sogliaMinima) {
-    confronto.currentRatio = { valore: cr, stato: "BUONO", messaggio: `Current Ratio ${cr} — sopra la soglia minima di 1.0` };
+    righe.push(`✅  Current Ratio [BUONO] — ${cr}, sopra soglia minima 1.0`);
   } else {
-    confronto.currentRatio = { valore: cr, stato: "CRITICO", messaggio: `Current Ratio ${cr} — sotto 1.0: l'impresa non copre le uscite a breve` };
+    righe.push(`❌  Current Ratio [CRITICO] — ${cr}, sotto 1.0`);
   }
 
-  // EBITDA Margin
   const ebitda = parseFloat(risultatoPerformance.ebitdaMargin);
   const { min, max } = benchmarkEdilizia.ebitdaMargin.stimaPMI;
   if (ebitda >= max) {
-    confronto.ebitdaMargin = { valore: ebitda, stato: "OTTIMO", messaggio: `EBITDA Margin ${ebitda}% — sopra la stima di settore (${min}–${max}%) ⚠️ benchmark non verificato` };
+    righe.push(`✅  EBITDA Margin [SOPRA MEDIA] — ${ebitda}%, stima settore ${min}–${max}% ⚠️ INFERENZA`);
   } else if (ebitda >= min) {
-    confronto.ebitdaMargin = { valore: ebitda, stato: "NELLA MEDIA", messaggio: `EBITDA Margin ${ebitda}% — nella stima di settore (${min}–${max}%) ⚠️ benchmark non verificato` };
+    righe.push(`⚠️  EBITDA Margin [NELLA MEDIA] — ${ebitda}%, stima settore ${min}–${max}% ⚠️ INFERENZA`);
   } else {
-    confronto.ebitdaMargin = { valore: ebitda, stato: "SOTTO MEDIA", messaggio: `EBITDA Margin ${ebitda}% — sotto la stima di settore (${min}–${max}%) ⚠️ benchmark non verificato` };
+    righe.push(`❌  EBITDA Margin [SOTTO MEDIA] — ${ebitda}%, stima settore ${min}–${max}% ⚠️ INFERENZA`);
   }
 
-  return confronto;
+  return righe;
 }
 
 module.exports = { benchmarkEdilizia, confrontaBenchmark };
