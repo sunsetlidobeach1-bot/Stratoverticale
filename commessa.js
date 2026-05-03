@@ -1,8 +1,13 @@
 // StratoVerticale — Modulo Analisi Commessa
-// Versione 0.1 — Prima bozza
+// Versione 0.2 — Sessione 5 — 3 maggio 2026
+//
+// Modifica rispetto a v0.1:
+//   - "earnedValue" rinominato in "salEmessi" (SAL = Stato di Avanzamento Lavori)
+//   - Il CPI ora confronta SAL emessi vs costi sostenuti
+//   - Aggiunto "avanzamentoPerc": percentuale di fatturato emessa sul totale contratto
 
 function analizzaCommessa(commessa) {
-  
+
   // MARGINE DI COMMESSA
   const margine = commessa.ricavi - commessa.costiDiretti;
   const marginePercentuale = (margine / commessa.ricavi) * 100;
@@ -11,36 +16,24 @@ function analizzaCommessa(commessa) {
   const scostamentoAssoluto = commessa.costiDiretti - commessa.budgetPrevisto;
   const scostamentoPercentuale = (scostamentoAssoluto / commessa.budgetPrevisto) * 100;
 
-  // CPI — Cost Performance Index
-  // Misura se stai spendendo più o meno rispetto al lavoro completato
-  const cpi = commessa.earnedValue / commessa.costiDiretti;
+  // AVANZAMENTO — % del contratto già fatturata al cliente
+  const avanzamentoPerc = (commessa.salEmessi / commessa.ricavi) * 100;
 
-  // RISULTATO
+  // CPI — Cost Performance Index
+  // SAL emessi / costi sostenuti
+  // Sotto 1.0: stai spendendo più di quanto hai fatturato — alert
+  // Es: 0.73 → stai spendendo il 37% in più rispetto ai SAL emessi
+  const cpi = commessa.salEmessi / commessa.costiDiretti;
+
   return {
     nomeCommessa: commessa.nome,
     margineEuro: margine.toFixed(2),
     marginePercentuale: marginePercentuale.toFixed(2),
     scostamentoEuro: scostamentoAssoluto.toFixed(2),
     scostamentoPercentuale: scostamentoPercentuale.toFixed(2),
+    avanzamentoPerc: avanzamentoPerc.toFixed(1),
     cpi: cpi.toFixed(2),
   };
 }
 
-// ESEMPIO — Commessa di prova
-const commessaEsempio = {
-  nome: "Ristrutturazione Via Roma 12",
-  ricavi: 80000,
-  costiDiretti: 55000,
-  budgetPrevisto: 50000,
-  earnedValue: 40000,
-};
-
-const risultato = analizzaCommessa(commessaEsempio);
-console.log("=== ANALISI COMMESSA ===");
-console.log("Commessa:", risultato.nomeCommessa);
-console.log("Margine (€):", risultato.margineEuro);
-console.log("Margine (%):", risultato.marginePercentuale + "%");
-console.log("Scostamento budget (€):", risultato.scostamentoEuro);
-console.log("Scostamento budget (%):", risultato.scostamentoPercentuale + "%");
-console.log("CPI:", risultato.cpi);
 module.exports = { analizzaCommessa };

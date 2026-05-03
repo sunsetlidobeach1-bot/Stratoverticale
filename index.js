@@ -21,7 +21,7 @@ try {
   commessa = input.commessa;
   azienda  = input.azienda;
 
-  const campiCommessa = ["ricavi", "costiDiretti", "budgetPrevisto", "earnedValue"];
+  const campiCommessa = ["ricavi", "costiDiretti", "budgetPrevisto", "salEmessi"];
   const campiAzienda  = ["fatturato", "acquisti", "creditiClienti", "debitiFornitori",
                           "attivitaCorrenti", "passivitaCorrenti", "ebitda",
                           "costoLavoro", "costoSubappalti"];
@@ -60,6 +60,7 @@ console.log("Margine (€):            ", risultatoCommessa.margineEuro, "€");
 console.log("Margine (%):            ", risultatoCommessa.marginePercentuale + "%");
 console.log("Scostamento budget (€): ", risultatoCommessa.scostamentoEuro, "€");
 console.log("Scostamento budget (%): ", risultatoCommessa.scostamentoPercentuale + "%");
+console.log("Avanzamento SAL:        ", risultatoCommessa.avanzamentoPerc + "%");
 console.log("CPI:                    ", risultatoCommessa.cpi);
 
 console.log("\n─── MODULO B — DIAGNOSTICA LIQUIDITÀ ───────────────");
