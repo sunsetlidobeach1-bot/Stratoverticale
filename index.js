@@ -23,8 +23,8 @@ try {
 
   const campiCommessa = ["ricavi", "costiDiretti", "budgetPrevisto", "salEmessi"];
   const campiAzienda  = ["fatturato", "acquisti", "creditiClienti", "debitiFornitori",
-                          "attivitaCorrenti", "passivitaCorrenti", "ebitda",
-                          "costoLavoro", "costoSubappalti"];
+                        "attivitaCorrenti", "passivitaCorrenti",
+                        "costoLavoro", "costoSubappalti", "altriCostiOperativi"];
 
   const mancanti = [
     ...campiCommessa.filter(c => commessa[c] === undefined).map(c => `commessa.${c}`),
@@ -71,6 +71,7 @@ console.log("CCN (Capitale Circolante Netto):    ", risultatoLiquidita.ccn, "€
 console.log("Current Ratio:                      ", risultatoLiquidita.currentRatio);
 
 console.log("\n─── MODULO C — PERFORMANCE AZIENDALE ───────────────");
+console.log("EBITDA (€):                  ", risultatoPerformance.ebitda, "€");
 console.log("EBITDA Margin:               ", risultatoPerformance.ebitdaMargin, "%");
 console.log("Incidenza costo lavoro:      ", risultatoPerformance.incidenzaCostoLavoro, "%");
 console.log("Rapporto subappalto/fattur.: ", risultatoPerformance.rapportoSubappalto, "%");
