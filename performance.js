@@ -47,21 +47,4 @@ function analizzaPerformance(azienda) {
     // roi: roi.toFixed(1),                          // PLACEHOLDER — vedere sopra
   };
 }
-
-// ESEMPIO — Azienda di prova
-// Stessi valori base del Modulo B dove possibile, per coerenza futura con index.js
-const aziendaEsempio = {
-  fatturato: 500000,
-  ebitda: 35000,          // risultato operativo lordo prima di ammortamenti/interessi/tasse
-  costoLavoro: 140000,    // costo personale dipendente diretto (esclusi subappaltatori)
-  costoSubappalti: 120000, // costo lavori affidati a terzi
-};
-
-const risultato = analizzaPerformance(aziendaEsempio);
-
-console.log("=== PERFORMANCE AZIENDALE ===");
-console.log("EBITDA Margin:", risultato.ebitdaMargin, "%");
-console.log("Incidenza costo lavoro:", risultato.incidenzaCostoLavoro, "%");
-console.log("Rapporto subappalto/fatturato:", risultato.rapportoSubappalto, "%");
-// console.log("ROI:", risultato.roi, "%");   // PLACEHOLDER — da attivare con input dinamico
 module.exports = { analizzaPerformance };

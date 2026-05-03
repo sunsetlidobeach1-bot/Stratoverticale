@@ -33,23 +33,4 @@ function analizzaLiquidita(azienda) {
     currentRatio: currentRatio.toFixed(2),
   };
 }
-
-// ESEMPIO — Azienda di prova
-const aziendaEsempio = {
-  fatturato: 500000,
-  acquisti: 200000,
-  creditiClienti: 120000,
-  debitiFornitori: 40000,
-  attivitaCorrenti: 180000,
-  passivitaCorrenti: 160000,
-};
-
-const risultato = analizzaLiquidita(aziendaEsempio);
-
-console.log("=== DIAGNOSTICA LIQUIDITÀ ===");
-console.log("DSO (giorni medi incasso):", risultato.dso, "giorni");
-console.log("DPO (giorni medi pagamento fornitori):", risultato.dpo, "giorni");
-console.log("Delta DSO-DPO:", risultato.deltaDsoDpo, "giorni");
-console.log("CCN (Capitale Circolante Netto):", risultato.ccn, "€");
-console.log("Current Ratio:", risultato.currentRatio);
 module.exports = { analizzaLiquidita };
