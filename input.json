@@ -1,0 +1,23 @@
+{
+  "_nota": "Sostituisci questi numeri con i dati reali dell'azienda da analizzare. Tutti i valori in euro.",
+
+  "commessa": {
+    "nome": "Ristrutturazione Via Roma 12",
+    "ricavi": 80000,
+    "costiDiretti": 55000,
+    "budgetPrevisto": 50000,
+    "earnedValue": 40000
+  },
+
+  "azienda": {
+    "fatturato": 500000,
+    "acquisti": 200000,
+    "creditiClienti": 120000,
+    "debitiFornitori": 40000,
+    "attivitaCorrenti": 180000,
+    "passivitaCorrenti": 160000,
+    "ebitda": 35000,
+    "costoLavoro": 140000,
+    "costoSubappalti": 120000
+  }
+}

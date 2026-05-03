@@ -1,72 +1,95 @@
 // StratoVerticale — Motore Completo
-// Versione 0.1 — Prima bozza
-// Sessione 3 — 2 maggio 2026
+// Versione 0.2 — Sessione 5 — 3 maggio 2026
 //
-// Questo file collega i tre moduli del motore di analisi:
-//   - Modulo A: analizzaCommessa()   → analisi del singolo cantiere
-//   - Modulo B: analizzaLiquidita()  → diagnostica finanziaria aziendale
-//   - Modulo C: analizzaPerformance() → redditività e struttura dei costi
+// Novità rispetto a v0.1:
+//   - Input dinamico: i dati vengono letti da input.json (non più hardcoded)
+//   - Collegamento benchmark: confrontaBenchmark() gira in automatico dopo i moduli B e C
+//   - Output strutturato: la sezione benchmark è integrata nell'output finale
 //
-// Per ora i dati sono hardcoded. Il prossimo step è l'input dinamico:
-// l'utente inserirà i propri numeri invece di modificare questo file.
-//
-// NOTA: il Modulo A lavora su una singola commessa. In futuro gestirà
-// un array di commesse e produrrà un'analisi aggregata multi-cantiere.
+// Per analizzare una nuova azienda: modifica input.json, poi esegui `node index.js`
 
-// ─── IMPORT MODULI ───────────────────────────────────────────────
-const { analizzaCommessa } = require("./commessa");
-const { analizzaLiquidita } = require("./liquidita");
+const { analizzaCommessa }    = require("./commessa");
+const { analizzaLiquidita }   = require("./liquidita");
 const { analizzaPerformance } = require("./performance");
+const { confrontaBenchmark }  = require("./benchmark");
 
-// ─── INPUT DATI ──────────────────────────────────────────────────
+// ─── INPUT DINAMICO ──────────────────────────────────────────────
+let commessa, azienda;
 
-// Dati della commessa (Modulo A)
-const commessa = {
-  nome: "Ristrutturazione Via Roma 12",
-  ricavi: 80000,
-  costiDiretti: 55000,
-  budgetPrevisto: 50000,
-  earnedValue: 40000,
-};
+try {
+  const input = require("./input.json");
+  commessa = input.commessa;
+  azienda  = input.azienda;
 
-// Dati aziendali (Moduli B e C)
-const azienda = {
-  // Modulo B — Diagnostica Liquidità
-  fatturato: 500000,
-  acquisti: 200000,
-  creditiClienti: 120000,
-  debitiFornitori: 40000,
-  attivitaCorrenti: 180000,
-  passivitaCorrenti: 160000,
+  const campiCommessa = ["ricavi", "costiDiretti", "budgetPrevisto", "earnedValue"];
+  const campiAzienda  = ["fatturato", "acquisti", "creditiClienti", "debitiFornitori",
+                          "attivitaCorrenti", "passivitaCorrenti", "ebitda",
+                          "costoLavoro", "costoSubappalti"];
 
-  // Modulo C — Performance Aziendale
-  ebitda: 35000,
-  costoLavoro: 140000,
-  costoSubappalti: 120000,
-};
+  const mancanti = [
+    ...campiCommessa.filter(c => commessa[c] === undefined).map(c => `commessa.${c}`),
+    ...campiAzienda.filter(c => azienda[c] === undefined).map(c => `azienda.${c}`),
+  ];
 
-// ─── ESECUZIONE ──────────────────────────────────────────────────
-const risultatoCommessa = analizzaCommessa(commessa);
-const risultatoLiquidita = analizzaLiquidita(azienda);
+  if (mancanti.length > 0) {
+    console.error("❌ ERRORE — Campi mancanti in input.json:", mancanti.join(", "));
+    process.exit(1);
+  }
+
+} catch (e) {
+  console.error("❌ ERRORE — Impossibile leggere input.json.");
+  console.error("   Assicurati che il file esista nella stessa cartella di index.js.");
+  console.error("   Dettaglio:", e.message);
+  process.exit(1);
+}
+
+// ─── ESECUZIONE MODULI ───────────────────────────────────────────
+const risultatoCommessa    = analizzaCommessa(commessa);
+const risultatoLiquidita   = analizzaLiquidita(azienda);
 const risultatoPerformance = analizzaPerformance(azienda);
+const risultatoBenchmark   = confrontaBenchmark(risultatoLiquidita, risultatoPerformance);
 
 // ─── OUTPUT ──────────────────────────────────────────────────────
-console.log("=== ANALISI COMMESSA ===");
-console.log("Commessa:", risultatoCommessa.nomeCommessa);
-console.log("Margine (€):", risultatoCommessa.margineEuro);
-console.log("Margine (%):", risultatoCommessa.marginePercentuale + "%");
-console.log("Scostamento budget (€):", risultatoCommessa.scostamentoEuro);
-console.log("Scostamento budget (%):", risultatoCommessa.scostamentoPercentuale + "%");
-console.log("CPI:", risultatoCommessa.cpi);
+console.log("\n╔══════════════════════════════════════════════════╗");
+console.log("║         STRATOVERTICALE — ANALISI EDILIZIA       ║");
+console.log("╚══════════════════════════════════════════════════╝");
 
-console.log("\n=== DIAGNOSTICA LIQUIDITÀ ===");
-console.log("DSO (giorni medi incasso):", risultatoLiquidita.dso, "giorni");
-console.log("DPO (giorni medi pagamento fornitori):", risultatoLiquidita.dpo, "giorni");
-console.log("Delta DSO-DPO:", risultatoLiquidita.deltaDsoDpo, "giorni");
-console.log("CCN (Capitale Circolante Netto):", risultatoLiquidita.ccn, "€");
-console.log("Current Ratio:", risultatoLiquidita.currentRatio);
+console.log("\n─── MODULO A — ANALISI COMMESSA ─────────────────────");
+console.log("Commessa:               ", risultatoCommessa.nomeCommessa);
+console.log("Margine (€):            ", risultatoCommessa.margineEuro, "€");
+console.log("Margine (%):            ", risultatoCommessa.marginePercentuale + "%");
+console.log("Scostamento budget (€): ", risultatoCommessa.scostamentoEuro, "€");
+console.log("Scostamento budget (%): ", risultatoCommessa.scostamentoPercentuale + "%");
+console.log("CPI:                    ", risultatoCommessa.cpi);
 
-console.log("\n=== PERFORMANCE AZIENDALE ===");
-console.log("EBITDA Margin:", risultatoPerformance.ebitdaMargin, "%");
-console.log("Incidenza costo lavoro:", risultatoPerformance.incidenzaCostoLavoro, "%");
-console.log("Rapporto subappalto/fatturato:", risultatoPerformance.rapportoSubappalto, "%");
+console.log("\n─── MODULO B — DIAGNOSTICA LIQUIDITÀ ───────────────");
+console.log("DSO (giorni medi incasso):          ", risultatoLiquidita.dso, "giorni");
+console.log("DPO (giorni medi pagamento forni.): ", risultatoLiquidita.dpo, "giorni");
+console.log("Delta DSO-DPO:                      ", risultatoLiquidita.deltaDsoDpo, "giorni");
+console.log("CCN (Capitale Circolante Netto):    ", risultatoLiquidita.ccn, "€");
+console.log("Current Ratio:                      ", risultatoLiquidita.currentRatio);
+
+console.log("\n─── MODULO C — PERFORMANCE AZIENDALE ───────────────");
+console.log("EBITDA Margin:               ", risultatoPerformance.ebitdaMargin, "%");
+console.log("Incidenza costo lavoro:      ", risultatoPerformance.incidenzaCostoLavoro, "%");
+console.log("Rapporto subappalto/fattur.: ", risultatoPerformance.rapportoSubappalto, "%");
+
+console.log("\n─── CONFRONTO BENCHMARK SETTORIALE ─────────────────");
+console.log("(Riferimento: PMI edilizie italiane, FNC 2024 + Allianz Trade)\n");
+
+const icone = {
+  OTTIMO: "✅", BUONO: "✅", "NELLA MEDIA": "⚠️",
+  ATTENZIONE: "⚠️", CRITICO: "❌", ALLARME: "🚨", "SOTTO MEDIA": "❌"
+};
+
+for (const [kpi, risultato] of Object.entries(risultatoBenchmark)) {
+  const icona = icone[risultato.stato] || "•";
+  console.log(`${icona}  ${kpi.toUpperCase().padEnd(15)} [${risultato.stato}]`);
+  console.log(`   ${risultato.messaggio}`);
+  console.log();
+}
+
+console.log("════════════════════════════════════════════════════");
+console.log("⚠️  Nota: alcuni benchmark sono stime non ancora verificate da fonte primaria.");
+console.log("    Vedere benchmark.js per dettagli sull'affidabilità di ogni valore.");
+console.log("════════════════════════════════════════════════════\n");
