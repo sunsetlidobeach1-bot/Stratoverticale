@@ -15,6 +15,7 @@
   "commessa": {
     "nome": "Ristrutturazione Via Roma 12",
     "valoreContratto": 80000,
+    "budgetPrevisto": 50000,
     "costiDiretti": 55000,
     "salEmessi": 40000
   }
