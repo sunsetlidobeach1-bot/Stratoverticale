@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StratoVerticale · Edilizia — Prototipo UI v1.1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sv-bg:#f7f5f0;--sv-card:#ffffff;--sv-border:rgba(0,0,0,0.08);--sv-border-strong:rgba(0,0,0,0.18);
+  --sv-text:#1a1916;--sv-muted:#6b6960;--sv-accent:#1a472a;--sv-accent-light:#e8f0eb;
+  --sv-warn:#92400e;--sv-warn-light:#fef3c7;--sv-danger:#7f1d1d;--sv-danger-light:#fee2e2;
+  --sv-success:#14532d;--sv-success-light:#dcfce7;--sv-grid:rgba(0,0,0,0.05)
+}
+body{font-family:'Georgia',serif;background:var(--sv-bg);min-height:100vh;padding:1.5rem 1rem}
+.app{max-width:820px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 1.25rem}
+.logo{font-size:13px;letter-spacing:0.1em;color:var(--sv-muted);text-transform:uppercase}
+.logo span{color:var(--sv-text);font-weight:600}
+.date-badge{font-size:11px;font-family:monospace;background:var(--sv-accent-light);padding:3px 10px;border-radius:4px;color:var(--sv-accent)}
+.tabs{display:flex;gap:0;margin-bottom:1.25rem;border:0.5px solid var(--sv-border);border-radius:7px;overflow:hidden;background:var(--sv-bg)}
+.tab{flex:1;padding:9px;font-size:12px;text-align:center;cursor:pointer;color:var(--sv-muted);border:none;background:transparent;font-family:'Georgia',serif;transition:all 0.12s}
+.tab.active{background:var(--sv-card);color:var(--sv-text);font-weight:500}
+.view{display:none}.view.active{display:block}
+.section-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--sv-muted);margin-bottom:10px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.kpi{background:var(--sv-card);border:0.5px solid var(--sv-border);border-radius:8px;padding:12px 14px}
+.kpi-label{font-size:10px;color:var(--sv-muted);letter-spacing:0.05em;margin-bottom:5px;font-family:monospace}
+.kpi-value{font-size:20px;font-weight:600;color:var(--sv-text);line-height:1}
+.kpi-sub{font-size:10px;color:var(--sv-muted);margin-top:3px}
+.kpi.good .kpi-value{color:var(--sv-success)}.kpi.warn .kpi-value{color:var(--sv-warn)}.kpi.danger .kpi-value{color:var(--sv-danger)}
+
+/* CE */
+.ce-card{background:var(--sv-card);border:0.5px solid var(--sv-border);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem}
+.ce-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--sv-grid)}
+.ce-row:last-child{border-bottom:none}
+.ce-label{font-size:13px;color:var(--sv-text)}.ce-label.indent{padding-left:14px;color:var(--sv-muted);font-size:12px}
+.ce-val{font-size:13px;font-weight:500;font-family:monospace}.ce-val.neg{color:var(--sv-danger)}.ce-val.bold{font-size:14px;font-weight:600}
+.ce-row.total{background:var(--sv-accent-light);border-radius:4px;padding:7px 10px;margin-top:4px}
+.ce-row.total .ce-label{font-weight:600;color:var(--sv-accent)}.ce-row.total .ce-val{color:var(--sv-accent);font-weight:700}
+
+/* Commesse */
+.commesse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.btn-new{background:var(--sv-accent);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'Georgia',serif;display:flex;align-items:center;gap:6px}
+.btn-new:hover{opacity:0.88}
+.commessa-card{background:var(--sv-card);border:0.5px solid var(--sv-border);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.commessa-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer}
+.commessa-name{font-size:14px;font-weight:500;color:var(--sv-text);flex:1}
+.commessa-meta{font-size:11px;color:var(--sv-muted);font-family:monospace}
+.badge{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500;letter-spacing:0.04em;font-family:monospace}
+.badge.attiva{background:#dcfce7;color:#14532d}.badge.completata{background:#e0e7ff;color:#3730a3}.badge.sospesa{background:#fef3c7;color:#92400e}
+.commessa-body{display:none;border-top:0.5px solid var(--sv-grid)}
+.commessa-body.open{display:block}
+.body-section{padding:12px 14px;border-bottom:0.5px solid var(--sv-grid)}
+.body-section:last-child{border-bottom:none}
+.body-section-title{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--sv-muted);margin-bottom:8px;font-family:monospace;display:flex;align-items:center;justify-content:space-between}
+.body-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Voci registro */
+.voce-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--sv-grid)}
+.voce-row:last-child{border-bottom:none}
+.voce-importo{font-size:13px;font-weight:500;font-family:monospace;color:var(--sv-text);min-width:80px;text-align:right}
+.voce-nota{font-size:12px;color:var(--sv-muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.voce-data{font-size:10px;color:var(--sv-muted);font-family:monospace;min-width:55px}
+.btn-del{background:none;border:none;cursor:pointer;color:var(--sv-muted);font-size:16px;padding:1px 4px;line-height:1;transition:color 0.1s}
+.btn-del:hover{color:var(--sv-danger)}
+.btn-add-voce{background:var(--sv-accent);color:#fff;border:none;padding:5px 12px;border-radius:5px;font-size:11px;cursor:pointer;font-family:monospace;white-space:nowrap;margin-top:6px}
+.btn-add-voce:hover{opacity:0.85}
+.btn-add-budget{background:var(--sv-muted);color:#fff;border:none;padding:5px 12px;border-radius:5px;font-size:11px;cursor:pointer;font-family:monospace;white-space:nowrap;margin-top:4px}
+
+/* Struttura */
+.struct-cat{background:var(--sv-card);border:0.5px solid var(--sv-border);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.struct-cat-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer}
+.struct-cat-name{font-size:13px;font-weight:500;color:var(--sv-text)}
+.struct-cat-tot{font-size:13px;font-family:monospace;color:var(--sv-accent);font-weight:600}
+.struct-cat-body{display:none;border-top:0.5px solid var(--sv-grid);padding:10px 14px}
+.struct-cat-body.open{display:block}
+
+/* Modali */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--sv-card);border-radius:10px;padding:1.25rem;width:360px;border:0.5px solid var(--sv-border)}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--sv-text)}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--sv-muted);margin-bottom:4px;font-family:monospace}
+.field input,.field select,.field textarea{width:100%;padding:7px 9px;border:0.5px solid var(--sv-border);border-radius:5px;font-size:13px;background:var(--sv-bg);color:var(--sv-text);font-family:'Georgia',serif}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--sv-accent)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+.btn-sm{font-size:12px;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:'Georgia',serif;border:0.5px solid var(--sv-border);background:transparent;color:var(--sv-text)}
+.btn-sm:hover{background:var(--sv-bg)}
+.btn-sm.primary{background:var(--sv-accent);color:#fff;border-color:var(--sv-accent)}.btn-sm.primary:hover{opacity:0.85}
+.btn-sm.danger-outline{color:var(--sv-danger);border-color:rgba(127,29,29,0.25)}.btn-sm.danger-outline:hover{background:var(--sv-danger-light)}
+
+/* Misc */
+.empty-small{font-size:11px;color:var(--sv-muted);padding:4px 0;font-style:italic}
+.margin-bar{height:5px;background:var(--sv-grid);border-radius:3px;overflow:hidden;margin-top:6px}
+.margin-fill{height:100%;border-radius:3px;background:var(--sv-accent)}
+.margin-fill.warn{background:#d97706}.margin-fill.danger{background:#dc2626}
+.margin-label{display:flex;justify-content:space-between;font-size:10px;color:var(--sv-muted);margin-top:3px;font-family:monospace}
+.body-actions{display:flex;gap:6px;padding:10px 14px}
+.mini-bars{display:flex;align-items:flex-end;gap:4px;height:70px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bar-month{font-size:9px;color:var(--sv-muted);font-family:monospace}
+.bm-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--sv-grid)}
+.bm-row:last-child{border-bottom:none}
+.bm-label{font-size:12px;color:var(--sv-text);flex:1}
+.bm-val{font-size:12px;font-family:monospace;font-weight:500;min-width:54px;text-align:right}
+.bm-ref{font-size:11px;color:var(--sv-muted);min-width:76px;text-align:right}
+.bm-s{font-size:10px;padding:2px 7px;border-radius:3px;font-family:monospace;min-width:44px;text-align:center}
+.bm-ok{background:#dcfce7;color:#14532d}.bm-warn{background:#fef3c7;color:#92400e}.bm-bad{background:#fee2e2;color:#7f1d1d}
+.divider{height:0.5px;background:var(--sv-border);margin:10px 0}
+.version-tag{font-size:10px;color:var(--sv-muted);font-family:monospace;text-align:right;padding-top:2rem;opacity:0.6}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="topbar">
+  <div class="logo"><span>Strato</span>Verticale · Edilizia</div>
+  <div class="date-badge" id="dateBadge"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab" onclick="switchTab('commesse')">Commesse</button>
+  <button class="tab" onclick="switchTab('struttura')">Costi struttura</button>
+  <button class="tab" onclick="switchTab('benchmark')">Benchmark</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+  <div class="section-title">KPI aziendali</div>
+  <div class="kpi-grid">
+    <div class="kpi" id="kpi-fat"><div class="kpi-label">FATTURATO SAL</div><div class="kpi-value" id="kv-fat">€ 0</div><div class="kpi-sub" id="ks-fat">0 commesse</div></div>
+    <div class="kpi" id="kpi-ebitda"><div class="kpi-label">EBITDA MARGIN</div><div class="kpi-value" id="kv-ebitda">—</div><div class="kpi-sub">bench: 5–8%</div></div>
+    <div class="kpi" id="kpi-margine"><div class="kpi-label">MARGINE MEDIO</div><div class="kpi-value" id="kv-margine">—</div><div class="kpi-sub">bench: 25–35%</div></div>
+    <div class="kpi" id="kpi-sal"><div class="kpi-label">SAL NON INCASSATI</div><div class="kpi-value" id="kv-sal">€ 0</div><div class="kpi-sub">esposizione crediti</div></div>
+  </div>
+  <div class="section-title">Conto economico macro</div>
+  <div class="ce-card">
+    <div class="ce-row"><span class="ce-label">Fatturato (SAL emessi)</span><span class="ce-val bold" id="ce-fat">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A1 Manodopera diretta</span><span class="ce-val neg" id="ce-A1">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A2 Materiali</span><span class="ce-val neg" id="ce-A2">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A3 Subappalti</span><span class="ce-val neg" id="ce-A3">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A4 Mezzi e attrezzature</span><span class="ce-val neg" id="ce-A4">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A5 Sicurezza cantiere</span><span class="ce-val neg" id="ce-A5">€ 0</span></div>
+    <div class="ce-row"><span class="ce-label indent">↳ A6 Costi amm. commessa</span><span class="ce-val neg" id="ce-A6">€ 0</span></div>
+    <div class="ce-row total"><span class="ce-label">Margine lordo commesse</span><span class="ce-val bold" id="ce-mlc">€ 0</span></div>
+    <div class="ce-row" style="margin-top:6px"><span class="ce-label">Costi di struttura (totale voci inserite)</span><span class="ce-val neg" id="ce-struct">€ 0</span></div>
+    <div class="ce-row total"><span class="ce-label">EBITDA</span><span class="ce-val bold" id="ce-ebitda">€ 0</span></div>
+  </div>
+  <div class="section-title">Andamento mensile SAL emessi (ultimi 6 mesi)</div>
+  <div class="ce-card"><div class="mini-bars" id="monthlyChart"></div></div>
+</div>
+
+<!-- COMMESSE -->
+<div id="view-commesse" class="view">
+  <div class="commesse-header">
+    <div class="section-title" style="margin:0">Commesse</div>
+    <button class="btn-new" onclick="openModalCommessa()">+ Nuova commessa</button>
+  </div>
+  <div id="commesseList"><div style="text-align:center;padding:2.5rem;color:var(--sv-muted);font-size:13px">Nessuna commessa. Creane una con il tasto verde.</div></div>
+</div>
+
+<!-- STRUTTURA -->
+<div id="view-struttura" class="view">
+  <div class="commesse-header">
+    <div class="section-title" style="margin:0">Costi fissi di struttura</div>
+    <button class="btn-new" onclick="openModalStruttura()">+ Nuovo costo</button>
+  </div>
+  <div id="strutturaList"></div>
+  <div class="ce-card" style="margin-top:8px">
+    <div class="ce-row total"><span class="ce-label">Totale struttura (tutte le voci)</span><span class="ce-val bold" id="struct-grand-total">€ 0</span></div>
+  </div>
+</div>
+
+<!-- BENCHMARK -->
+<div id="view-benchmark" class="view">
+  <div class="section-title">Benchmark settoriale — Edilizia PMI italiana</div>
+  <div class="ce-card">
+    <div class="bm-row"><span class="bm-label">EBITDA Margin</span><span class="bm-val" id="bm-ebitda-v">—</span><span class="bm-ref">5–8% ⚠️</span><span class="bm-s" id="bm-ebitda-s">n.d.</span></div>
+    <div class="bm-row"><span class="bm-label">Margine lordo commesse</span><span class="bm-val" id="bm-mlc-v">—</span><span class="bm-ref">25–35% ⚠️</span><span class="bm-s" id="bm-mlc-s">n.d.</span></div>
+    <div class="bm-row"><span class="bm-label">Incid. manodopera / fatturato</span><span class="bm-val" id="bm-mdo-v">—</span><span class="bm-ref">28–30% ⚠️</span><span class="bm-s" id="bm-mdo-s">n.d.</span></div>
+    <div class="bm-row"><span class="bm-label">Incid. subappalti / fatturato</span><span class="bm-val" id="bm-sub-v">—</span><span class="bm-ref">15–35% ⚠️</span><span class="bm-s" id="bm-sub-s">n.d.</span></div>
+    <div class="bm-row"><span class="bm-label">Incid. struttura / fatturato</span><span class="bm-val" id="bm-str-v">—</span><span class="bm-ref">13–17% ✅</span><span class="bm-s" id="bm-str-s">n.d.</span></div>
+  </div>
+  <div style="font-size:11px;color:var(--sv-muted);line-height:1.8;padding:0 2px;margin-top:4px">
+    ✅ Fonte primaria verificata &nbsp;·&nbsp; ⚠️ Inferenza / fonte non primaria &nbsp;·&nbsp; ❌ Da verificare<br>
+    Fonte principale: FNC Osservatorio Costruzioni 2024. Ultimo aggiornamento benchmark: sessione 4 (apr 2026).
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- MODAL NUOVA COMMESSA -->
+<div class="modal-bg" id="modalCommessa">
+  <div class="modal">
+    <h3>Nuova commessa</h3>
+    <div class="field"><label>Nome commessa</label><input id="mc-nome" type="text" placeholder="Es. Ristrutturazione Via Roma 12"></div>
+    <div class="field"><label>Valore contratto (€)</label><input id="mc-contratto" type="number" placeholder="0" min="0"></div>
+    <div class="field"><label>Stato</label>
+      <select id="mc-stato"><option value="attiva">Attiva</option><option value="sospesa">Sospesa</option><option value="completata">Completata</option></select>
+    </div>
+    <div class="field"><label>Data apertura</label><input id="mc-data" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModalCommessa()">Annulla</button>
+      <button class="btn-sm primary" onclick="creaCommessa()">Crea commessa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUOVA VOCE COMMESSA -->
+<div class="modal-bg" id="modalVoce">
+  <div class="modal">
+    <h3 id="mv-title">Aggiungi voce</h3>
+    <div class="field"><label>Importo (€)</label><input id="mv-importo" type="number" placeholder="0" step="0.01" min="0"></div>
+    <div class="field"><label>Nota / descrizione</label><input id="mv-nota" type="text" placeholder="Es. Calcestruzzo fornitore Rossi — 3 mc"></div>
+    <div class="field"><label>Data</label><input id="mv-data" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModalVoce()">Annulla</button>
+      <button class="btn-sm primary" onclick="salvaVoce()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUOVO COSTO STRUTTURA -->
+<div class="modal-bg" id="modalStruttura">
+  <div class="modal">
+    <h3>Nuovo costo struttura</h3>
+    <div class="field"><label>Categoria</label>
+      <select id="ms-cat">
+        <option value="Personale amministrativo">Personale amministrativo</option>
+        <option value="Affitti e sedi">Affitti e sedi</option>
+        <option value="Utenze sede">Utenze sede</option>
+        <option value="Mezzi aziendali">Mezzi aziendali</option>
+        <option value="Assicurazioni">Assicurazioni</option>
+        <option value="Consulenze ricorrenti">Consulenze ricorrenti</option>
+        <option value="Costi amministrativi fissi">Costi amministrativi fissi</option>
+        <option value="Marketing">Marketing</option>
+      </select>
+    </div>
+    <div class="field"><label>Importo (€)</label><input id="ms-importo" type="number" placeholder="0" step="0.01" min="0"></div>
+    <div class="field"><label>Descrizione</label><input id="ms-nota" type="text" placeholder="Es. Canone affitto ufficio maggio 2026"></div>
+    <div class="field"><label>Data</label><input id="ms-data" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModalStruttura()">Annulla</button>
+      <button class="btn-sm primary" onclick="salvaStruttura()">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<div class="version-tag">StratoVerticale · Prototipo UI v1.1 · Fase 0 · 8 maggio 2026</div>
+
+<script>
+// ============================================================
+// COSTANTI
+// ============================================================
+const CATS = ['A1','A2','A3','A4','A5','A6'];
+const CLABELS = {
+  A1:'Manodopera diretta',
+  A2:'Materiali',
+  A3:'Subappalti',
+  A4:'Mezzi e attrezzature',
+  A5:'Sicurezza cantiere',
+  A6:'Costi amm. commessa'
+};
+const STRUCT_CATS = [
+  'Personale amministrativo','Affitti e sedi','Utenze sede','Mezzi aziendali',
+  'Assicurazioni','Consulenze ricorrenti','Costi amministrativi fissi','Marketing'
+];
+const STORAGE_KEY = 'sv_prototipo_v1';
+
+// ============================================================
+// STATE
+// ============================================================
+let state = { commesse: [], struttura: [] };
+let _voceCtx = { cidx: null, field: null, subkey: null };
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) state = JSON.parse(s);
+  } catch(e) { console.warn('Errore caricamento stato', e); }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e) { console.warn('Errore salvataggio stato', e); }
+}
+
+// ============================================================
+// UTILITY
+// ============================================================
+function fmt(n) { return '€ ' + Math.round(n).toLocaleString('it-IT'); }
+function fmtp(n) { return n.toFixed(1) + '%'; }
+function today() { return new Date().toISOString().substring(0, 10); }
+function sumVoci(voci) { return (voci || []).reduce((a, v) => a + (parseFloat(v.importo) || 0), 0); }
+
+// ============================================================
+// CALCOLI
+// ============================================================
+function calcCommessa(c) {
+  const sal = sumVoci(c.sal_voci);
+  const incassato = sumVoci(c.incassato_voci);
+  const costi = {};
+  CATS.forEach(k => costi[k] = sumVoci(c.costi_voci[k]));
+  const budget = {};
+  CATS.forEach(k => budget[k] = sumVoci(c.budget_voci[k]));
+  const totCosti = CATS.reduce((a, k) => a + costi[k], 0);
+  const contratto = parseFloat(c.contratto) || 0;
+  const margine = sal > 0 ? ((sal - totCosti) / sal * 100) : null;
+  const avanz = contratto > 0 ? (sal / contratto * 100) : 0;
+  return { sal, incassato, costi, budget, totCosti, margine, avanz, contratto };
+}
+
+function calcTotali() {
+  let fat = 0, costs = {A1:0,A2:0,A3:0,A4:0,A5:0,A6:0}, salExp = 0, attive = 0;
+  state.commesse.forEach(c => {
+    const r = calcCommessa(c);
+    fat += r.sal;
+    salExp += r.sal - r.incassato;
+    CATS.forEach(k => costs[k] += r.costi[k]);
+    if (c.stato === 'attiva') attive++;
+  });
+  const totCosti = CATS.reduce((a, k) => a + costs[k], 0);
+  const mlc = fat - totCosti;
+  const struct = sumVoci(state.struttura);
+  const ebitda = mlc - struct;
+  return { fat, costs, mlc, struct, ebitda, salExp, attive };
+}
+
+// ============================================================
+// RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const t = calcTotali();
+  const fat = t.fat;
+  const eP = fat > 0 ? (t.ebitda / fat * 100) : null;
+  const mP = fat > 0 ? (t.mlc / fat * 100) : null;
+  const mdo = fat > 0 ? (t.costs.A1 / fat * 100) : null;
+  const sub = fat > 0 ? (t.costs.A3 / fat * 100) : null;
+  const str = fat > 0 ? (t.struct / fat * 100) : null;
+
+  document.getElementById('kv-fat').textContent = fmt(fat);
+  document.getElementById('ks-fat').textContent = t.attive + ' attive';
+
+  function setKpi(id, val, lo, hi) {
+    const el = document.getElementById('kpi-' + id);
+    const vEl = document.getElementById('kv-' + id);
+    if (val === null) { vEl.textContent = '—'; el.className = 'kpi'; return; }
+    vEl.textContent = fmtp(val);
+    el.className = 'kpi ' + (val >= lo && val <= hi ? 'good' : val < lo * 0.7 || val > hi * 1.5 ? 'danger' : 'warn');
+  }
+  setKpi('ebitda', eP, 5, 8);
+  setKpi('margine', mP, 25, 35);
+  document.getElementById('kv-sal').textContent = fmt(t.salExp);
+
+  document.getElementById('ce-fat').textContent = fmt(fat);
+  CATS.forEach(k => {
+    const el = document.getElementById('ce-' + k);
+    el.textContent = '− ' + fmt(t.costs[k]);
+  });
+  const mlcEl = document.getElementById('ce-mlc');
+  mlcEl.textContent = fmt(t.mlc);
+  mlcEl.className = 'ce-val bold' + (t.mlc < 0 ? ' neg' : '');
+  document.getElementById('ce-struct').textContent = '− ' + fmt(t.struct);
+  const eEl = document.getElementById('ce-ebitda');
+  eEl.textContent = fmt(t.ebitda);
+  eEl.className = 'ce-val bold' + (t.ebitda < 0 ? ' neg' : '');
+
+  renderChart();
+  renderBenchmark(eP, mP, mdo, sub, str);
+}
+
+function renderChart() {
+  const months = {};
+  const d = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const dd = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    const key = dd.getFullYear() + '-' + (dd.getMonth() + 1).toString().padStart(2, '0');
+    months[key] = 0;
+  }
+  state.commesse.forEach(c => {
+    const sal = sumVoci(c.sal_voci);
+    const k = (c.dataApertura || today()).substring(0, 7);
+    if (months.hasOwnProperty(k)) months[k] += sal;
+  });
+  const keys = Object.keys(months);
+  const vals = keys.map(k => months[k]);
+  const maxV = Math.max(...vals, 1);
+  const cont = document.getElementById('monthlyChart');
+  cont.innerHTML = '';
+  keys.forEach((k, i) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const bar = document.createElement('div');
+    const h = Math.round((vals[i] / maxV) * 60);
+    bar.style.cssText = 'height:' + h + 'px;background:var(--sv-accent);opacity:' + (0.35 + 0.65 * vals[i] / maxV) + ';width:100%;border-radius:2px 2px 0 0';
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-month';
+    lbl.textContent = k.substring(5);
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    cont.appendChild(col);
+  });
+}
+
+function renderBenchmark(eP, mP, mdo, sub, str) {
+  function set(id, val, lo, hi) {
+    document.getElementById('bm-' + id + '-v').textContent = val !== null ? fmtp(val) : '—';
+    const s = document.getElementById('bm-' + id + '-s');
+    if (val === null) { s.textContent = 'n.d.'; s.className = 'bm-s'; return; }
+    if (val >= lo && val <= hi) { s.textContent = 'OK'; s.className = 'bm-s bm-ok'; }
+    else if (val < lo * 0.7 || val > hi * 1.5) { s.textContent = 'ALERT'; s.className = 'bm-s bm-bad'; }
+    else { s.textContent = 'ATT.'; s.className = 'bm-s bm-warn'; }
+  }
+  set('ebitda', eP, 5, 8);
+  set('mlc', mP, 25, 35);
+  set('mdo', mdo, 28, 30);
+  set('sub', sub, 15, 35);
+  set('str', str, 13, 17);
+}
+
+// ============================================================
+// RENDER COMMESSE
+// ============================================================
+function renderCommesse() {
+  const list = document.getElementById('commesseList');
+  if (state.commesse.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--sv-muted);font-size:13px">Nessuna commessa. Creane una con il tasto verde.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.commesse.forEach((c, cidx) => {
+    const r = calcCommessa(c);
+    const card = document.createElement('div');
+    card.className = 'commessa-card';
+    const mColor = r.margine === null ? 'var(--sv-muted)' : r.margine >= 25 ? 'var(--sv-success)' : r.margine >= 10 ? 'var(--sv-warn)' : 'var(--sv-danger)';
+    const fillCls = r.margine === null ? '' : r.margine >= 25 ? '' : r.margine >= 10 ? 'warn' : 'danger';
+    const fillW = r.margine !== null ? Math.min(Math.max(r.margine, 0), 60) / 60 * 100 : 0;
+
+    const catsHtml = CATS.map(k => {
+      const tot = r.costi[k];
+      const budget = r.budget[k];
+      const delta = budget > 0 ? (tot - budget) : null;
+      const deltaHtml = delta !== null
+        ? `<span style="font-size:10px;font-family:monospace;color:${delta > 0 ? 'var(--sv-danger)' : 'var(--sv-success)'}">${delta > 0 ? '+' : ''}${fmt(delta)}</span>`
+        : '';
+      return `
+        <div style="margin-bottom:12px">
+          <div class="body-section-title">
+            <span>${CLABELS[k]}</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              ${deltaHtml}
+              <span style="font-size:12px;font-family:monospace;color:var(--sv-accent);font-weight:600">${fmt(tot)}</span>
+            </div>
+          </div>
+          ${buildVociHtml(c.costi_voci[k], cidx, 'costi_voci', k)}
+          <button class="btn-add-voce" onclick="openModalVoce(${cidx},'costi_voci','${k}')">+ Aggiungi spesa</button>
+          <div style="margin-top:8px;padding-top:8px;border-top:0.5px dashed var(--sv-grid)">
+            <div style="font-size:10px;color:var(--sv-muted);margin-bottom:4px;font-family:monospace">Budget previsto: <strong>${fmt(budget)}</strong></div>
+            ${buildVociHtml(c.budget_voci[k], cidx, 'budget_voci', k)}
+            <button class="btn-add-budget" onclick="openModalVoce(${cidx},'budget_voci','${k}')">+ Aggiungi budget</button>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--sv-grid);margin:4px 0"></div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="commessa-head" onclick="toggleC(${cidx})">
+        <div style="flex:1">
+          <div class="commessa-name">${c.nome}</div>
+          <div class="commessa-meta">${c.dataApertura || '—'} · contratto ${fmt(r.contratto)}</div>
+        </div>
+        <span class="badge ${c.stato}">${c.stato}</span>
+        <span style="font-size:13px;font-family:monospace;font-weight:600;color:${mColor};margin-left:10px">${r.margine !== null ? fmtp(r.margine) : '—'}</span>
+        <span style="font-size:18px;color:var(--sv-muted);margin-left:8px">${c.open ? '▲' : '▼'}</span>
+      </div>
+      <div class="commessa-body ${c.open ? 'open' : ''}">
+        <div class="body-section">
+          <div class="body-two">
+            <div>
+              <div class="body-section-title">
+                <span>SAL emessi</span>
+                <span style="font-family:monospace;font-weight:600;color:var(--sv-accent)">${fmt(r.sal)}</span>
+              </div>
+              ${buildVociHtml(c.sal_voci, cidx, 'sal_voci', null)}
+              <button class="btn-add-voce" onclick="openModalVoce(${cidx},'sal_voci',null)">+ Aggiungi SAL</button>
+            </div>
+            <div>
+              <div class="body-section-title">
+                <span>Incassato</span>
+                <span style="font-family:monospace;font-weight:600;color:var(--sv-accent)">${fmt(r.incassato)}</span>
+              </div>
+              ${buildVociHtml(c.incassato_voci, cidx, 'incassato_voci', null)}
+              <button class="btn-add-voce" onclick="openModalVoce(${cidx},'incassato_voci',null)">+ Aggiungi incasso</button>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:22px;font-weight:600;color:${mColor}">${r.margine !== null ? fmtp(r.margine) : '—'}</div>
+            <div class="margin-bar"><div class="margin-fill ${fillCls}" style="width:${fillW}%"></div></div>
+            <div class="margin-label"><span>0%</span><span>target ≥25%</span><span>60%</span></div>
+            <div style="margin-top:5px;font-size:11px;color:var(--sv-muted)">
+              Avanzamento contratto: <strong>${r.avanz.toFixed(1)}%</strong> &nbsp;·&nbsp;
+              SAL non incassati: <strong>${fmt(r.sal - r.incassato)}</strong>
+            </div>
+          </div>
+        </div>
+        <div class="body-section">
+          <div class="body-section-title">Costi diretti di commessa</div>
+          ${catsHtml}
+        </div>
+        <div class="body-actions">
+          <button class="btn-sm" onclick="cambiaStato(${cidx})">Cambia stato</button>
+          <button class="btn-sm danger-outline" onclick="eliminaC(${cidx})">Elimina commessa</button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function buildVociHtml(voci, cidx, field, subkey) {
+  if (!voci || voci.length === 0) return '<div class="empty-small">Nessuna voce.</div>';
+  return voci.map((v, vi) => `
+    <div class="voce-row">
+      <div class="voce-data">${v.data || ''}</div>
+      <div class="voce-nota">${v.nota || '—'}</div>
+      <div class="voce-importo">${fmt(parseFloat(v.importo) || 0)}</div>
+      <button class="btn-del" onclick="eliminaVoce(${cidx},'${field}',${subkey ? `'${subkey}'` : 'null'},${vi})" title="Elimina voce">✕</button>
+    </div>`).join('');
+}
+
+function toggleC(idx) {
+  state.commesse[idx].open = !state.commesse[idx].open;
+  saveState(); renderCommesse();
+}
+function cambiaStato(idx) {
+  const stati = ['attiva','sospesa','completata'];
+  const i = stati.indexOf(state.commesse[idx].stato);
+  state.commesse[idx].stato = stati[(i + 1) % 3];
+  saveState(); renderCommesse(); renderDashboard();
+}
+function eliminaC(idx) {
+  if (confirm('Eliminare la commessa "' + state.commesse[idx].nome + '"? Questa azione non è reversibile.')) {
+    state.commesse.splice(idx, 1);
+    saveState(); renderCommesse(); renderDashboard();
+  }
+}
+function eliminaVoce(cidx, field, subkey, vi) {
+  if (subkey && subkey !== 'null') {
+    state.commesse[cidx][field][subkey].splice(vi, 1);
+  } else {
+    state.commesse[cidx][field].splice(vi, 1);
+  }
+  saveState(); renderCommesse(); renderDashboard();
+}
+
+// ============================================================
+// MODAL COMMESSA
+// ============================================================
+function openModalCommessa() {
+  document.getElementById('mc-nome').value = '';
+  document.getElementById('mc-contratto').value = '';
+  document.getElementById('mc-stato').value = 'attiva';
+  document.getElementById('mc-data').value = today();
+  document.getElementById('modalCommessa').classList.add('open');
+  setTimeout(() => document.getElementById('mc-nome').focus(), 50);
+}
+function closeModalCommessa() { document.getElementById('modalCommessa').classList.remove('open'); }
+function creaCommessa() {
+  const nome = document.getElementById('mc-nome').value.trim();
+  if (!nome) { alert('Inserisci il nome della commessa.'); return; }
+  const c = {
+    id: Date.now(), nome,
+    contratto: document.getElementById('mc-contratto').value || 0,
+    stato: document.getElementById('mc-stato').value,
+    dataApertura: document.getElementById('mc-data').value,
+    open: true,
+    sal_voci: [], incassato_voci: [],
+    costi_voci: { A1:[], A2:[], A3:[], A4:[], A5:[], A6:[] },
+    budget_voci: { A1:[], A2:[], A3:[], A4:[], A5:[], A6:[] }
+  };
+  state.commesse.unshift(c);
+  saveState(); closeModalCommessa(); renderCommesse(); renderDashboard();
+  switchTab('commesse');
+}
+
+// ============================================================
+// MODAL VOCE COMMESSA
+// ============================================================
+function openModalVoce(cidx, field, subkey) {
+  _voceCtx = { cidx, field, subkey };
+  let titleMap = {
+    sal_voci: 'SAL emesso',
+    incassato_voci: 'Incasso ricevuto',
+    costi_voci: 'Spesa — ' + (CLABELS[subkey] || ''),
+    budget_voci: 'Budget — ' + (CLABELS[subkey] || '')
+  };
+  document.getElementById('mv-title').textContent = 'Aggiungi: ' + (titleMap[field] || 'voce');
+  document.getElementById('mv-importo').value = '';
+  document.getElementById('mv-nota').value = '';
+  document.getElementById('mv-data').value = today();
+  document.getElementById('modalVoce').classList.add('open');
+  setTimeout(() => document.getElementById('mv-importo').focus(), 50);
+}
+function closeModalVoce() { document.getElementById('modalVoce').classList.remove('open'); }
+function salvaVoce() {
+  const imp = parseFloat(document.getElementById('mv-importo').value);
+  if (!imp || imp <= 0) { alert('Inserisci un importo valido (> 0).'); return; }
+  const v = {
+    importo: imp,
+    nota: document.getElementById('mv-nota').value,
+    data: document.getElementById('mv-data').value
+  };
+  const { cidx, field, subkey } = _voceCtx;
+  if (subkey && subkey !== 'null') {
+    state.commesse[cidx][field][subkey].push(v);
+  } else {
+    state.commesse[cidx][field].push(v);
+  }
+  saveState(); closeModalVoce(); renderCommesse(); renderDashboard();
+}
+
+// ============================================================
+// RENDER STRUTTURA
+// ============================================================
+function renderStruttura() {
+  const grouped = {};
+  STRUCT_CATS.forEach(cat => grouped[cat] = []);
+  state.struttura.forEach((v, vi) => {
+    if (grouped[v.cat]) grouped[v.cat].push({ ...v, _vi: vi });
+  });
+  const grandTotal = sumVoci(state.struttura);
+  document.getElementById('struct-grand-total').textContent = fmt(grandTotal);
+
+  const list = document.getElementById('strutturaList');
+  list.innerHTML = '';
+  STRUCT_CATS.forEach(cat => {
+    const voci = grouped[cat];
+    const tot = voci.reduce((a, v) => a + (parseFloat(v.importo) || 0), 0);
+    const div = document.createElement('div');
+    div.className = 'struct-cat';
+    const bodyOpen = voci.length > 0;
+    div.innerHTML = `
+      <div class="struct-cat-head" onclick="toggleSCat(this)">
+        <span class="struct-cat-name">${cat}</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--sv-muted);font-family:monospace">${voci.length} voci</span>
+          <span class="struct-cat-tot">${fmt(tot)}</span>
+          <span style="color:var(--sv-muted)">${bodyOpen ? '▲' : '▼'}</span>
+        </div>
+      </div>
+      <div class="struct-cat-body ${bodyOpen ? 'open' : ''}">
+        ${voci.length === 0
+          ? '<div class="empty-small">Nessuna voce inserita.</div>'
+          : voci.map(v => `
+            <div class="voce-row">
+              <div class="voce-data">${v.data || ''}</div>
+              <div class="voce-nota">${v.nota || cat}</div>
+              <div class="voce-importo">${fmt(parseFloat(v.importo) || 0)}</div>
+              <button class="btn-del" onclick="eliminaStruttura(${v._vi})" title="Elimina">✕</button>
+            </div>`).join('')
+        }
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleSCat(head) {
+  const body = head.nextElementSibling;
+  const open = body.classList.toggle('open');
+  const arrow = head.querySelector('span:last-child');
+  if (arrow) arrow.textContent = open ? '▲' : '▼';
+}
+function eliminaStruttura(vi) {
+  state.struttura.splice(vi, 1);
+  saveState(); renderStruttura(); renderDashboard();
+}
+
+// ============================================================
+// MODAL STRUTTURA
+// ============================================================
+function openModalStruttura() {
+  document.getElementById('ms-cat').value = STRUCT_CATS[0];
+  document.getElementById('ms-importo').value = '';
+  document.getElementById('ms-nota').value = '';
+  document.getElementById('ms-data').value = today();
+  document.getElementById('modalStruttura').classList.add('open');
+  setTimeout(() => document.getElementById('ms-importo').focus(), 50);
+}
+function closeModalStruttura() { document.getElementById('modalStruttura').classList.remove('open'); }
+function salvaStruttura() {
+  const imp = parseFloat(document.getElementById('ms-importo').value);
+  if (!imp || imp <= 0) { alert('Inserisci un importo valido (> 0).'); return; }
+  const v = {
+    cat: document.getElementById('ms-cat').value,
+    importo: imp,
+    nota: document.getElementById('ms-nota').value,
+    data: document.getElementById('ms-data').value
+  };
+  state.struttura.push(v);
+  saveState(); closeModalStruttura(); renderStruttura(); renderDashboard();
+}
+
+// ============================================================
+// TABS & INIT
+// ============================================================
+function switchTab(name) {
+  const names = ['dashboard','commesse','struttura','benchmark'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'commesse') renderCommesse();
+  if (name === 'struttura') renderStruttura();
+  if (name === 'benchmark') renderDashboard();
+}
+
+// Chiudi modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModalCommessa();
+    closeModalVoce();
+    closeModalStruttura();
+  }
+});
+
+// Init
+loadState();
+document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
+renderDashboard();
+renderCommesse();
+</script>
+</body>
+</html>
