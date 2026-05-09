@@ -932,6 +932,37 @@ function renderBenchmark(){
 // inizializza flag personale visibilità
 document.getElementById('cs-flag-amm-wrap').style.display='block';
 
+function seedDemoData(){
+  if(localStorage.getItem('sv3'))return;
+  S.commesse=[
+    {
+      id:'demo001',nome:'Ristrutturazione Villa Colombo',
+      contratto:280000,budget:220000,dataApertura:'2026-01-10',stato:'attiva',
+      sal_voci:[],incassato_voci:[],
+      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+    },
+    {
+      id:'demo002',nome:'Capannone Industriale Bergamo',
+      contratto:620000,budget:490000,dataApertura:'2026-02-01',stato:'attiva',
+      sal_voci:[],incassato_voci:[],
+      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+    },
+    {
+      id:'demo003',nome:'Appartamenti Via Manzoni 14',
+      contratto:180000,budget:150000,dataApertura:'2026-03-15',stato:'attiva',
+      sal_voci:[],incassato_voci:[],
+      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+    },
+    {
+      id:'demo004',nome:'Scuola Elementare Trezzo',
+      contratto:95000,budget:80000,dataApertura:'2026-01-20',stato:'completata',
+      sal_voci:[],incassato_voci:[],
+      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+    }
+  ];
+  save();
+}
+seedDemoData();
 renderDashboard();
 
 /* ---- AUTH ---- */
