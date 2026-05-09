@@ -468,13 +468,16 @@ function calcAz(){
     c.sal_voci.forEach(v=>{
       if(!v.scadenza)return;
       const scadMs=new Date(v.scadenza).setHours(0,0,0,0);
+      if(scadMs>=todayMs)return; // scadenza futura: non contare
       const primoInc=incSort.find(i=>i.data>=v.data);
       let delay;
       if(primoInc){
-        delay=Math.round((new Date(primoInc.data).setHours(0,0,0,0)-scadMs)/(864e5));
-      }else if(scadMs<todayMs){
+        // incassato: ritardo = max(0, incasso−scadenza); pagamenti anticipati → 0 gg
+        delay=Math.max(0,Math.round((new Date(primoInc.data).setHours(0,0,0,0)-scadMs)/864e5));
+      }else{
+        // non incassato con scadenza passata: ritardo = oggi − scadenza
         delay=Math.round((todayMs-scadMs)/864e5);
-      }else{return;}
+      }
       dsoWSum+=delay*v.importo;dsoWTot+=v.importo;
     });
   });
@@ -955,7 +958,7 @@ function renderBenchmark(){
 document.getElementById('cs-flag-amm-wrap').style.display='block';
 
 function seedDemoData(){
-  const SEED_V='v3';
+  const SEED_V='v4';
   if(localStorage.getItem('sv3_seed')===SEED_V)return;
   localStorage.clear();
   S.commesse=[
