@@ -463,24 +463,26 @@ function calcAz(){
   let dso;
   let dsoWSum=0,dsoWTot=0;
   const todayMs=new Date().setHours(0,0,0,0);
+  console.log('[DSO] oggi=',new Date().toISOString().slice(0,10));
   S.commesse.forEach(c=>{
     const incSort=[...c.incassato_voci].filter(v=>v.data).sort((a,b)=>a.data.localeCompare(b.data));
     c.sal_voci.forEach(v=>{
-      if(!v.scadenza)return;
+      if(!v.scadenza){console.log(`  [SKIP no-scadenza] ${c.nome} | ${v.importo}€`);return;}
       const scadMs=new Date(v.scadenza).setHours(0,0,0,0);
-      if(scadMs>=todayMs)return; // scadenza futura: non contare
+      if(scadMs>=todayMs){console.log(`  [SKIP futura] ${c.nome} | ${v.importo}€ | scad ${v.scadenza}`);return;}
       const primoInc=incSort.find(i=>i.data>=v.data);
       let delay;
       if(primoInc){
-        // incassato: ritardo = max(0, incasso−scadenza); pagamenti anticipati → 0 gg
         delay=Math.max(0,Math.round((new Date(primoInc.data).setHours(0,0,0,0)-scadMs)/864e5));
+        console.log(`  [INCASSATO] ${c.nome} | ${v.importo}€ | scad ${v.scadenza} | incasso ${primoInc.data} | ritardo ${delay}gg | contributo ${delay*v.importo}`);
       }else{
-        // non incassato con scadenza passata: ritardo = oggi − scadenza
         delay=Math.round((todayMs-scadMs)/864e5);
+        console.log(`  [SCADUTO non incassato] ${c.nome} | ${v.importo}€ | scad ${v.scadenza} | ritardo ${delay}gg | contributo ${delay*v.importo}`);
       }
       dsoWSum+=delay*v.importo;dsoWTot+=v.importo;
     });
   });
+  console.log('[DSO] dsoWSum=',dsoWSum,' dsoWTot=',dsoWTot,' → dso=',dsoWTot>0?Math.round(dsoWSum/dsoWTot):(fat>0?Math.round(sni/fat*365):0));
   dso=dsoWTot>0?Math.round(dsoWSum/dsoWTot):(fat>0?Math.round(sni/fat*365):0);
   // struttura senza personale amm per benchmark
   const strBench=strP-strPAmm;
