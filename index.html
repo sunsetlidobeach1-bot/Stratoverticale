@@ -117,9 +117,66 @@ body{background:var(--bg);color:var(--tx);font-family:'DM Sans',system-ui,sans-s
 .flag-admin-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 11px;background:rgba(79,127,255,.06);border:1px solid rgba(79,127,255,.15);border-radius:var(--rads);font-size:12px;color:#a0b4ff;cursor:pointer;user-select:none}
 .flag-admin-row input{cursor:pointer;accent-color:var(--acc)}
 .badge-amm{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500;background:rgba(79,127,255,.18);color:var(--acc);margin-left:4px;vertical-align:middle}
+
+/* ---- AUTH SCREENS ---- */
+.screen-auth{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+.screen-auth.hidden{display:none}
+.auth-card{background:var(--surf);border:1px solid var(--brd2);border-radius:16px;padding:38px 40px;width:420px;max-width:94vw}
+.auth-logo{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+.auth-logo small{display:block;font-size:11px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;font-weight:400;margin-top:2px}
+.auth-title{font-size:16px;font-weight:600;margin:24px 0 5px}
+.auth-desc{font-size:13px;color:var(--mu);margin-bottom:24px;line-height:1.5}
+.auth-link{color:var(--acc);cursor:pointer;font-size:13px;background:none;border:none;padding:0;font-family:inherit;transition:opacity .15s}
+.auth-link:hover{opacity:.75;text-decoration:underline}
+.auth-footer{margin-top:20px;text-align:center;font-size:13px;color:var(--mu);line-height:1.9}
+.auth-forgot{text-align:right;margin-top:-8px;margin-bottom:16px}
+select option:disabled{color:#555;font-style:italic}
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="screen-login" class="screen-auth">
+  <div class="auth-card">
+    <div class="auth-logo">StratoVerticale<small>Edilizia · v3.2</small></div>
+    <div class="auth-title">Accedi al tuo account</div>
+    <div class="auth-desc">Gestione finanziaria per imprese di costruzioni</div>
+    <div class="fg-grp"><label class="fg-lbl">Email</label><input class="fi" id="login-email" type="email" placeholder="nome@azienda.it" autocomplete="email"></div>
+    <div class="fg-grp"><label class="fg-lbl">Password</label><input class="fi" id="login-pwd" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="auth-forgot"><button class="auth-link" onclick="showForgot()">Password dimenticata?</button></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px 13px" onclick="doLogin()">Accedi</button>
+    <div class="auth-footer">Non hai un account? <button class="auth-link" onclick="showRegister()">Registrati</button></div>
+  </div>
+</div>
+
+<!-- REGISTER SCREEN -->
+<div id="screen-register" class="screen-auth hidden">
+  <div class="auth-card">
+    <div class="auth-logo">StratoVerticale<small>Edilizia · v3.2</small></div>
+    <div class="auth-title">Crea il tuo account</div>
+    <div class="auth-desc">Inizia gratuitamente — nessuna carta richiesta</div>
+    <div class="fr2">
+      <div class="fg-grp"><label class="fg-lbl">Nome</label><input class="fi" id="reg-nome" type="text" placeholder="Mario" autocomplete="given-name"></div>
+      <div class="fg-grp"><label class="fg-lbl">Cognome</label><input class="fi" id="reg-cognome" type="text" placeholder="Rossi" autocomplete="family-name"></div>
+    </div>
+    <div class="fg-grp"><label class="fg-lbl">Email</label><input class="fi" id="reg-email" type="email" placeholder="nome@azienda.it" autocomplete="email"></div>
+    <div class="fr2">
+      <div class="fg-grp"><label class="fg-lbl">Password</label><input class="fi" id="reg-pwd" type="password" placeholder="••••••••" autocomplete="new-password"></div>
+      <div class="fg-grp"><label class="fg-lbl">Conferma password</label><input class="fi" id="reg-pwd2" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"></div>
+    </div>
+    <div class="fg-grp">
+      <label class="fg-lbl">Tipo di azienda</label>
+      <select class="fi" id="reg-tipo">
+        <option value="edilizia">Edilizia / Impiantistica</option>
+        <option disabled>Manifatturiero / Artigianale — coming soon</option>
+        <option disabled>HoReCa — coming soon</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px 13px;margin-top:6px" onclick="doRegister()">Crea account</button>
+    <div class="auth-footer">Hai già un account? <button class="auth-link" onclick="showLogin()">Accedi</button></div>
+  </div>
+</div>
+
 <div class="app">
 <aside class="sidebar">
   <div class="logo"><span>StratoVerticale</span><small>Edilizia · v3.2</small></div>
@@ -876,6 +933,27 @@ function renderBenchmark(){
 document.getElementById('cs-flag-amm-wrap').style.display='block';
 
 renderDashboard();
+
+/* ---- AUTH ---- */
+function showLogin(){
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('screen-register').classList.add('hidden');
+  setTimeout(()=>document.getElementById('login-email').focus(),50);
+}
+function showRegister(){
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-register').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('reg-nome').focus(),50);
+}
+function doLogin(){
+  document.getElementById('screen-login').classList.add('hidden');
+}
+function doRegister(){
+  document.getElementById('screen-register').classList.add('hidden');
+}
+function showForgot(){
+  alert('Recupero password non ancora disponibile in questa versione.');
+}
 </script>
 </body>
 </html>
