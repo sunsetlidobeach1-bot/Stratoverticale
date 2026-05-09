@@ -479,11 +479,6 @@ function calcAz(){
     });
   });
   dso=dsoWTot>0?Math.round(dsoWSum/dsoWTot):(fat>0?Math.round(sni/fat*365):0);
-  // DEBUG
-  console.log('[calcAz] S.commesse.length=',S.commesse.length);
-  S.commesse.forEach(c=>console.log(' ',c.nome,'sal_voci:',c.sal_voci.map(v=>({imp:v.importo,data:v.data,scadenza:v.scadenza||'(mancante)'})),'inc_voci:',c.incassato_voci.map(v=>v.data)));
-  console.log('[calcAz] dsoWSum=',dsoWSum,'dsoWTot=',dsoWTot,'→ dso=',dso,'fat=',fat,'fatP=',fatP);
-  // END DEBUG
   // struttura senza personale amm per benchmark
   const strBench=strP-strPAmm;
   const strBenchPct=fatP>0?strBench/fatP*100:0;
@@ -948,7 +943,7 @@ function renderBenchmark(){
     {l:'EBITDA margin',v:a.fat>0?fmtPct(a.ebitdaP/a.fatP*100||0,1):null,ref:'5–8%',ok:a.fatP>0&&a.ebitdaPct>=5,warn:a.fatP>0&&a.ebitdaPct>=2,note:'⚠ inferenza'},
     {l:'Margine lordo commesse',v:a.fatP>0?fmtPct(a.margLordoPct,1):null,ref:'25–35%',ok:a.fatP>0&&a.margLordoPct>=25,warn:a.fatP>0&&a.margLordoPct>=15,note:'⚠ inferenza'},
     {l:'Incidenza struttura su fatturato',v:strVal,ref:strRef,ok:strOk,warn:strWarn,note:strNote},
-    {l:'DSO — giorni incasso',v:a.dso>0?a.dso+'gg':null,ref:'≤80gg',ok:a.dso>0&&a.dso<=80,warn:a.dso>0&&a.dso<=120,note:'✅ verificato (Allianz Trade)'},
+    {l:'Ritardo medio incasso',v:a.fatP>0?a.dso+'gg':null,ref:'≤0gg',ok:a.fatP>0&&a.dso<=0,warn:a.fatP>0&&a.dso<=30,note:'media ponderata su SAL con scadenza'},
   ];
   document.getElementById('bench-list').innerHTML=rows.map(r=>{
     const c=r.ok?'var(--gn)':r.warn?'var(--am)':'var(--rd)';
