@@ -938,27 +938,111 @@ function seedDemoData(){
     {
       id:'demo001',nome:'Ristrutturazione Villa Colombo',
       contratto:280000,budget:220000,dataApertura:'2026-01-10',stato:'attiva',
-      sal_voci:[],incassato_voci:[],
-      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+      sal_voci:[
+        {id:'d1s1',importo:85000,nota:'',data:'2026-02-15'},
+        {id:'d1s2',importo:65000,nota:'',data:'2026-04-10'}
+      ],
+      incassato_voci:[
+        {id:'d1i1',importo:70000,nota:'',data:'2026-03-20'}
+      ],
+      costi_voci:{
+        A1:[],
+        A2:[
+          {id:'d1a2a',importo:28000,nota:'',data:'2026-02-20'},
+          {id:'d1a2b',importo:18000,nota:'',data:'2026-04-15'}
+        ],
+        A3:[
+          {id:'d1a3a',importo:22000,nota:'',data:'2026-03-01'}
+        ],
+        A4:[],A5:[],A6:[]
+      },
+      budget_voci:{}
     },
     {
       id:'demo002',nome:'Capannone Industriale Bergamo',
       contratto:620000,budget:490000,dataApertura:'2026-02-01',stato:'attiva',
-      sal_voci:[],incassato_voci:[],
-      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+      sal_voci:[
+        {id:'d2s1',importo:120000,nota:'',data:'2026-03-01'},
+        {id:'d2s2',importo:95000,nota:'',data:'2026-05-02'}
+      ],
+      incassato_voci:[
+        {id:'d2i1',importo:90000,nota:'',data:'2026-04-15'}
+      ],
+      costi_voci:{
+        A1:[
+          {id:'d2a1a',importo:18000,nota:'',data:'2026-03-15'}
+        ],
+        A2:[
+          {id:'d2a2a',importo:45000,nota:'',data:'2026-03-10'},
+          {id:'d2a2b',importo:32000,nota:'',data:'2026-05-05'}
+        ],
+        A3:[
+          {id:'d2a3a',importo:38000,nota:'',data:'2026-04-01'}
+        ],
+        A4:[],A5:[],A6:[]
+      },
+      budget_voci:{}
     },
     {
       id:'demo003',nome:'Appartamenti Via Manzoni 14',
       contratto:180000,budget:150000,dataApertura:'2026-03-15',stato:'attiva',
-      sal_voci:[],incassato_voci:[],
-      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+      sal_voci:[
+        {id:'d3s1',importo:55000,nota:'',data:'2026-04-20'}
+      ],
+      incassato_voci:[],
+      costi_voci:{
+        A1:[],
+        A2:[
+          {id:'d3a2a',importo:22000,nota:'',data:'2026-04-25'}
+        ],
+        A3:[
+          {id:'d3a3a',importo:15000,nota:'',data:'2026-05-01'}
+        ],
+        A4:[],A5:[],A6:[]
+      },
+      budget_voci:{}
     },
     {
       id:'demo004',nome:'Scuola Elementare Trezzo',
       contratto:95000,budget:80000,dataApertura:'2026-01-20',stato:'completata',
-      sal_voci:[],incassato_voci:[],
-      costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}
+      sal_voci:[
+        {id:'d4s1',importo:95000,nota:'',data:'2026-02-28'}
+      ],
+      incassato_voci:[
+        {id:'d4i1',importo:95000,nota:'',data:'2026-03-10'}
+      ],
+      costi_voci:{
+        A1:[],
+        A2:[
+          {id:'d4a2a',importo:31000,nota:'',data:'2026-01-25'}
+        ],
+        A3:[
+          {id:'d4a3a',importo:18000,nota:'',data:'2026-02-10'}
+        ],
+        A4:[],A5:[],A6:[]
+      },
+      budget_voci:{}
     }
+  ];
+  S.struttura=[
+    {id:'sp01',cat:'Personale',importo:8500,isAmm:false,nota:'Personale operativo',data:'2026-01-31'},
+    {id:'sp02',cat:'Personale',importo:8500,isAmm:false,nota:'Personale operativo',data:'2026-02-28'},
+    {id:'sp03',cat:'Personale',importo:8500,isAmm:false,nota:'Personale operativo',data:'2026-03-31'},
+    {id:'sp04',cat:'Personale',importo:8500,isAmm:false,nota:'Personale operativo',data:'2026-04-30'},
+    {id:'sp05',cat:'Personale',importo:8500,isAmm:false,nota:'Personale operativo',data:'2026-05-31'},
+    {id:'sa01',cat:'Affitti e sedi',importo:1800,isAmm:false,nota:'',data:'2026-01-31'},
+    {id:'sa02',cat:'Affitti e sedi',importo:1800,isAmm:false,nota:'',data:'2026-02-28'},
+    {id:'sa03',cat:'Affitti e sedi',importo:1800,isAmm:false,nota:'',data:'2026-03-31'},
+    {id:'sa04',cat:'Affitti e sedi',importo:1800,isAmm:false,nota:'',data:'2026-04-30'},
+    {id:'sa05',cat:'Affitti e sedi',importo:1800,isAmm:false,nota:'',data:'2026-05-31'},
+    {id:'su01',cat:'Utenze sede',importo:600,isAmm:false,nota:'',data:'2026-01-31'},
+    {id:'su02',cat:'Utenze sede',importo:600,isAmm:false,nota:'',data:'2026-02-28'},
+    {id:'su03',cat:'Utenze sede',importo:600,isAmm:false,nota:'',data:'2026-03-31'},
+    {id:'su04',cat:'Utenze sede',importo:600,isAmm:false,nota:'',data:'2026-04-30'},
+    {id:'su05',cat:'Utenze sede',importo:600,isAmm:false,nota:'',data:'2026-05-31'}
+  ];
+  S.entrate=[
+    {id:'ae01',cat:'Contributi e incentivi',importo:12000,nota:'',data:'2026-03-15'}
   ];
   save();
 }
