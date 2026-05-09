@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StratoVerticale · Edilizia v3.2</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1117;--surf:#181c27;--surf2:#1e2333;--brd:rgba(255,255,255,0.08);--brd2:rgba(255,255,255,0.14);--tx:#e8eaf0;--mu:#8b90a0;--acc:#4f7fff;--acc2:#2d5fff;--gn:#3dba7e;--rd:#e05a5a;--am:#e8a940;--rad:10px;--rads:6px}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;min-height:100vh}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{background:var(--surf);border-right:1px solid var(--brd);padding:24px 0;display:flex;flex-direction:column;gap:4px}
+.logo{padding:0 20px 20px;border-bottom:1px solid var(--brd);margin-bottom:8px}
+.logo span{font-size:16px;font-weight:700;letter-spacing:-.5px}
+.logo small{display:block;font-size:10px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--mu);transition:all .15s;font-size:13.5px;border-left:2px solid transparent}
+.nav:hover{color:var(--tx);background:rgba(255,255,255,.04)}
+.nav.active{color:var(--tx);border-left-color:var(--acc);background:rgba(79,127,255,.08)}
+.nav i{font-size:16px}
+.main{overflow-y:auto;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--brd);flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--rads);border:1px solid var(--brd2);background:transparent;color:var(--tx);cursor:pointer;font-size:13px;transition:all .15s;font-family:inherit}
+.btn:hover{background:rgba(255,255,255,.06)}
+.btn-primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn-primary:hover{background:var(--acc2)}
+.btn-sm{padding:4px 9px;font-size:12px}
+.btn-danger{border-color:rgba(224,90,90,.3);color:var(--rd)}
+.btn-danger:hover{background:rgba(224,90,90,.1)}
+.content{padding:22px 28px}
+.page{display:none}.page.active{display:block}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.stat{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);padding:15px 17px}
+.stat-lbl{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.stat-val{font-size:21px;font-weight:700;letter-spacing:-.5px}
+.stat-sub{font-size:12px;color:var(--mu);margin-top:3px}
+.ok{color:var(--gn)}.warn{color:var(--am)}.bad{color:var(--rd)}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);padding:18px 20px}
+.card-title{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.bdg-gn{background:rgba(61,186,126,.15);color:var(--gn)}.bdg-am{background:rgba(232,169,64,.15);color:var(--am)}.bdg-bl{background:rgba(79,127,255,.15);color:var(--acc)}
+.prog{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:5px}
+.prog-f{height:100%;border-radius:2px;transition:width .3s}
+.fg{background:var(--gn)}.fa{background:var(--am)}.fb{background:var(--acc)}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+.modal-ov.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:26px;width:540px;max-width:96vw;max-height:88vh;overflow-y:auto}
+.modal-hd{font-size:15px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.mc{cursor:pointer;color:var(--mu)}.mc:hover{color:var(--tx)}
+.fg-grp{margin-bottom:14px}
+.fg-lbl{display:block;font-size:11px;color:var(--mu);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;padding:8px 11px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rads);color:var(--tx);font-size:14px;outline:none;transition:border .15s;font-family:inherit}
+.fi:focus{border-color:var(--acc)}
+.fi-num{text-align:right;font-variant-numeric:tabular-nums}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fa-row{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--brd)}
+.info-box{background:rgba(79,127,255,.07);border:1px solid rgba(79,127,255,.18);border-radius:var(--rads);padding:11px 13px;margin-bottom:14px;font-size:12.5px;color:#a0b4ff;line-height:1.5}
+.warn-box{background:rgba(232,169,64,.07);border:1px solid rgba(232,169,64,.2);border-radius:var(--rad);padding:13px 17px;font-size:13px;color:#d4a035;line-height:1.6;margin-top:14px}
+.alert-box{background:rgba(224,90,90,.07);border:1px solid rgba(224,90,90,.25);border-radius:var(--rads);padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#f0a0a0;line-height:1.5}
+.voce-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd)}
+.voce-row:last-child{border-bottom:none}
+.voce-imp{font-size:13px;font-weight:600;min-width:90px;text-align:right}
+.voce-act{color:var(--mu);cursor:pointer;padding:3px;border-radius:4px;font-size:14px}
+.voce-act:hover{color:var(--tx);background:rgba(255,255,255,.06)}
+.cat-blk{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);padding:15px 17px;margin-bottom:11px}
+.cat-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;flex-wrap:wrap;gap:8px}
+.cat-nm{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.cat-tot{font-size:14px;font-weight:700}
+.cat-ren{cursor:pointer;color:var(--mu);font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid transparent}
+.cat-ren:hover{border-color:var(--brd2);color:var(--tx)}
+.empty{text-align:center;padding:48px 20px;color:var(--mu)}
+.empty i{font-size:30px;display:block;margin-bottom:10px;opacity:.35}
+.bench-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--brd)}
+.bench-row:last-child{border-bottom:none}
+.bench-lbl{flex:1;font-size:13px;font-weight:500}
+.bench-note{font-size:10px;color:var(--am);margin-top:2px}
+.bench-val{font-size:14px;font-weight:700;min-width:75px;text-align:right}
+.bench-ref{font-size:11px;color:var(--mu);min-width:110px;text-align:right}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kpi-row{display:flex;gap:11px;flex-wrap:wrap;margin-bottom:18px}
+.kpi-box{background:var(--surf2);border-radius:var(--rads);padding:11px 15px;min-width:120px}
+.kpi-box small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:3px}
+.kpi-box strong{font-size:19px;font-weight:700}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--mu);cursor:pointer;font-size:13px;margin-bottom:18px}
+.back:hover{color:var(--tx)}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-ttl{font-size:14px;font-weight:600}
+.rp-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.rp-row select,.rp-row input{padding:6px 9px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rads);color:var(--tx);font-size:13px;font-family:inherit}
+.rp-row select{flex:1}
+.rp-add{font-size:12px;color:var(--acc);cursor:pointer;padding:3px 0;display:inline-block}
+.rp-tot{font-size:12px;color:var(--mu);margin-top:5px}
+.rp-tot.ok{color:var(--gn)}.rp-tot.err{color:var(--rd)}
+.mano-warn{background:rgba(232,169,64,.08);border:1px solid rgba(232,169,64,.2);border-radius:var(--rads);padding:9px 12px;font-size:12px;color:var(--am);margin-bottom:12px;line-height:1.5}
+.chart-wrap{position:relative;height:200px;margin-top:10px}
+.comm-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--brd);cursor:pointer}
+.comm-row:last-child{border-bottom:none}
+.comm-row:hover{opacity:.8}
+
+/* ---- PERIODO v3.2: preset + mese specifico ---- */
+.period-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.period-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--brd2);background:transparent;color:var(--mu);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.period-btn:hover{color:var(--tx)}
+.period-btn.active{background:rgba(79,127,255,.15);border-color:var(--acc);color:var(--acc)}
+.period-sep{width:1px;height:16px;background:var(--brd2);flex-shrink:0}
+.period-custom{display:flex;align-items:center;gap:5px}
+.period-custom label{font-size:11px;color:var(--mu);white-space:nowrap}
+.period-custom select{padding:4px 8px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rads);color:var(--mu);font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s}
+.period-custom select.sel-active{border-color:var(--acc);color:var(--acc)}
+.month-chart-sel{padding:5px 10px;background:var(--surf2);border:1px solid var(--brd2);border-radius:var(--rads);color:var(--tx);font-size:12px;font-family:inherit}
+
+/* ---- FLAG PERSONALE AMMINISTRATIVO ---- */
+.flag-admin-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 11px;background:rgba(79,127,255,.06);border:1px solid rgba(79,127,255,.15);border-radius:var(--rads);font-size:12px;color:#a0b4ff;cursor:pointer;user-select:none}
+.flag-admin-row input{cursor:pointer;accent-color:var(--acc)}
+.badge-amm{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500;background:rgba(79,127,255,.18);color:var(--acc);margin-left:4px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo"><span>StratoVerticale</span><small>Edilizia · v3.2</small></div>
+  <div class="nav active" onclick="showPage('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+  <div class="nav" onclick="showPage('commesse')"><i class="ti ti-building-warehouse"></i> Commesse</div>
+  <div class="nav" onclick="showPage('struttura')"><i class="ti ti-receipt"></i> Costi struttura</div>
+  <div class="nav" onclick="showPage('entrate')"><i class="ti ti-cash"></i> Altre entrate</div>
+  <div class="nav" onclick="showPage('benchmark')"><i class="ti ti-chart-bar"></i> Benchmark</div>
+</aside>
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <div class="period-bar" id="period-bar"></div>
+  </div>
+  <div class="content">
+    <div id="dash-config-alert"></div>
+    <div class="g4" id="dash-kpi"></div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span class="card-title" style="margin-bottom:0">Andamento mensile</span>
+        <select class="month-chart-sel" id="dash-year-sel" onchange="renderDashboard()"></select>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-mensile"></canvas></div>
+    </div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Analisi flusso di cassa · DSO</div><div id="dash-cashflow"></div></div>
+      <div class="card"><div class="card-title">Commesse attive</div><div id="dash-comm-list"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px"><div class="card-title">Conto economico periodo</div><div id="dash-ce"></div></div>
+    <div class="card" style="margin-bottom:14px"><div class="card-title">Segnali di allerta · benchmark</div><div id="dash-allerta"></div></div>
+    <div class="info-box"><i class="ti ti-info-circle" style="vertical-align:-2px;margin-right:5px"></i><strong style="color:#c0ccff">Nota metodo:</strong> fatturato = solo SAL commesse. Altre entrate = proventi accessori (entrano nell'EBITDA, non nel fatturato). Personale con flag "amministrativo" = incluso nel CE, escluso dal benchmark struttura. Benchmark struttura cambia automaticamente in base alla configurazione rilevata.</div>
+  </div>
+</div>
+
+<!-- COMMESSE -->
+<div id="page-commesse" class="page">
+  <div class="topbar"><h1>Commesse</h1><button class="btn btn-primary" onclick="openModal('m-nc')"><i class="ti ti-plus"></i> Nuova commessa</button></div>
+  <div class="content">
+    <div id="comm-list-view"></div>
+    <div id="comm-detail" style="display:none"></div>
+  </div>
+</div>
+
+<!-- STRUTTURA -->
+<div id="page-struttura" class="page">
+  <div class="topbar"><h1>Costi struttura</h1><button class="btn btn-primary" onclick="openModal('m-cs')"><i class="btn btn-primary ti ti-plus"></i> Nuovo costo</button></div>
+  <div class="content"><div id="struttura-cats"></div></div>
+</div>
+
+<!-- ALTRE ENTRATE -->
+<div id="page-entrate" class="page">
+  <div class="topbar"><h1>Altre entrate</h1><button class="btn btn-primary" onclick="openModal('m-ae')"><i class="ti ti-plus"></i> Nuova entrata</button></div>
+  <div class="content">
+    <div class="info-box" style="margin-bottom:16px"><i class="ti ti-info-circle" style="vertical-align:-2px;margin-right:5px"></i>Contributi, rimborsi, vendita attrezzature e altri proventi accessori. <strong style="color:#c0ccff">Non confluiscono nel fatturato</strong>, ma vengono sommati all'EBITDA.</div>
+    <div id="entrate-list"></div>
+  </div>
+</div>
+
+<!-- BENCHMARK -->
+<div id="page-benchmark" class="page">
+  <div class="topbar"><h1>Benchmark settore</h1></div>
+  <div class="content">
+    <div class="card" style="margin-bottom:14px"><div id="bench-list"></div></div>
+    <div class="warn-box"><i class="ti ti-alert-triangle" style="vertical-align:-2px;margin-right:5px"></i>
+      <strong>Fonti e affidabilità:</strong><br>
+      DSO ≤80gg ✅ verificato (Allianz Trade + iCRIBIS) ·
+      EBITDA 5–8% ⚠ inferenza ·
+      Margine lordo commesse 25–35% ⚠ inferenza ·
+      Struttura (excl. personale) 13–17% ✅ (prezzari regionali) ·
+      Struttura (incl. personale operativo) 35–45% ⚠ da verificare con fonte primaria ·
+      Personale amm. su fatturato 3–6% ⚠ inferenza
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- MODAL nuova commessa -->
+<div id="m-nc" class="modal-ov"><div class="modal">
+  <div class="modal-hd">Nuova commessa <span class="mc" onclick="closeModal('m-nc')"><i class="ti ti-x"></i></span></div>
+  <div class="fg-grp"><label class="fg-lbl">Nome cantiere</label><input class="fi" id="nc-nome" placeholder="es. Ristrutturazione Via Roma 12"></div>
+  <div class="fr2">
+    <div class="fg-grp"><label class="fg-lbl">Valore contratto (€)</label><input class="fi fi-num" id="nc-contr" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this)"></div>
+    <div class="fg-grp"><label class="fg-lbl">Budget previsto (€)</label><input class="fi fi-num" id="nc-budg" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this)"></div>
+  </div>
+  <div class="fr2">
+    <div class="fg-grp"><label class="fg-lbl">Data apertura</label><input class="fi" id="nc-data" type="date"></div>
+    <div class="fg-grp"><label class="fg-lbl">Stato</label>
+      <select class="fi" id="nc-stato"><option value="attiva">Attiva</option><option value="sospesa">Sospesa</option><option value="completata">Completata</option></select>
+    </div>
+  </div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-nc')">Annulla</button><button class="btn btn-primary" onclick="saveCommessa()">Crea commessa</button></div>
+</div></div>
+
+<!-- MODAL voce commessa -->
+<div id="m-vc" class="modal-ov"><div class="modal">
+  <div class="modal-hd" id="m-vc-title">Voce <span class="mc" onclick="closeModal('m-vc')"><i class="ti ti-x"></i></span></div>
+  <div id="m-vc-mano-warn" class="mano-warn" style="display:none"><i class="ti ti-alert-triangle"></i> <strong>Manodopera diretta</strong> — se questi costi sono già in Struttura → Personale, inserirli qui li conta due volte nell'EBITDA.</div>
+  <div id="m-vc-rp-info" class="info-box" style="display:none"><i class="ti ti-git-branch" style="vertical-align:-2px;margin-right:5px"></i>Attiva la ripartizione per dividere una fattura o busta paga su più commesse.</div>
+  <div id="m-vc-rp-toggle" style="display:none;margin-bottom:12px">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--mu)"><input type="checkbox" id="rp-check" onchange="toggleRipart()"> Ripartisci su più commesse</label>
+  </div>
+  <div id="m-vc-normale">
+    <div class="fr2">
+      <div class="fg-grp"><label class="fg-lbl">Importo (€)</label><input class="fi fi-num" id="vc-imp" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this)"></div>
+      <div class="fg-grp"><label class="fg-lbl">Data</label><input class="fi" id="vc-data" type="date"></div>
+    </div>
+    <div class="fg-grp"><label class="fg-lbl">Descrizione / fornitore</label><input class="fi" id="vc-nota" placeholder="es. Fattura Edilmix n.234"></div>
+  </div>
+  <div id="m-vc-ripart" style="display:none">
+    <div class="fr2">
+      <div class="fg-grp"><label class="fg-lbl">Importo totale (€)</label><input class="fi fi-num" id="rp-tot-inp" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this);aggRipart()"></div>
+      <div class="fg-grp"><label class="fg-lbl">Data</label><input class="fi" id="rp-data" type="date"></div>
+    </div>
+    <div class="fg-grp"><label class="fg-lbl">Descrizione / fornitore</label><input class="fi" id="rp-nota" placeholder="es. Buste paga luglio"></div>
+    <div class="fg-grp">
+      <label class="fg-lbl">Assegna a commesse</label>
+      <div id="rp-rows"></div>
+      <span class="rp-add" onclick="addRpRow()"><i class="ti ti-plus" style="font-size:12px"></i> Aggiungi commessa</span>
+      <div id="rp-check-tot" class="rp-tot"></div>
+    </div>
+  </div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-vc')">Annulla</button><button class="btn btn-primary" onclick="saveVoce()">Salva</button></div>
+</div></div>
+
+<!-- MODAL modifica voce -->
+<div id="m-edit" class="modal-ov"><div class="modal" style="width:420px">
+  <div class="modal-hd" id="m-edit-title">Modifica voce <span class="mc" onclick="closeModal('m-edit')"><i class="ti ti-x"></i></span></div>
+  <div class="fr2">
+    <div class="fg-grp"><label class="fg-lbl">Importo (€)</label><input class="fi fi-num" id="edit-imp" type="text" inputmode="numeric" oninput="fmtInput(this)"></div>
+    <div class="fg-grp"><label class="fg-lbl">Data</label><input class="fi" id="edit-data" type="date"></div>
+  </div>
+  <div class="fg-grp"><label class="fg-lbl">Descrizione</label><input class="fi" id="edit-nota"></div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-edit')">Annulla</button><button class="btn btn-primary" id="edit-save-btn" onclick="saveEdit()">Salva modifiche</button></div>
+</div></div>
+
+<!-- MODAL costo struttura — CON FLAG PERSONALE AMMINISTRATIVO -->
+<div id="m-cs" class="modal-ov"><div class="modal">
+  <div class="modal-hd">Nuovo costo struttura <span class="mc" onclick="closeModal('m-cs')"><i class="ti ti-x"></i></span></div>
+  <div class="fg-grp">
+    <label class="fg-lbl">Categoria</label>
+    <select class="fi" id="cs-cat" onchange="checkCustom('cs');checkPersonale()">
+      <option value="Personale">Personale</option>
+      <option>Affitti e sedi</option><option>Utenze sede</option>
+      <option>Mezzi aziendali</option><option>Assicurazioni</option>
+      <option>Consulenze ricorrenti</option><option>Costi amministrativi fissi</option>
+      <option>Marketing</option><option value="__new__">+ Nuova categoria...</option>
+    </select>
+  </div>
+  <div id="cs-custom" class="fg-grp" style="display:none"><label class="fg-lbl">Nome categoria</label><input class="fi" id="cs-custom-nm" placeholder="es. Formazione, Spese legali..."></div>
+  <!-- FLAG PERSONALE AMMINISTRATIVO -->
+  <div id="cs-flag-amm-wrap">
+    <label class="flag-admin-row">
+      <input type="checkbox" id="cs-flag-amm">
+      <span>Personale <strong>amministrativo</strong> — escludi dal benchmark incidenza struttura</span>
+    </label>
+    <div style="font-size:11px;color:var(--mu);margin-top:5px;padding-left:2px">Attiva se si tratta di personale d'ufficio, contabilità, direzione. Lascia deselezionato per personale operativo (operai, capisquadra non attribuiti a commesse).</div>
+  </div>
+  <div class="fr2" style="margin-top:14px">
+    <div class="fg-grp"><label class="fg-lbl">Importo (€)</label><input class="fi fi-num" id="cs-imp" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this)"></div>
+    <div class="fg-grp"><label class="fg-lbl">Data</label><input class="fi" id="cs-data" type="date"></div>
+  </div>
+  <div class="fg-grp"><label class="fg-lbl">Descrizione</label><input class="fi" id="cs-nota" placeholder="es. Buste paga operai luglio"></div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-cs')">Annulla</button><button class="btn btn-primary" onclick="saveCostoStr()">Salva</button></div>
+</div></div>
+
+<!-- MODAL altra entrata -->
+<div id="m-ae" class="modal-ov"><div class="modal">
+  <div class="modal-hd">Nuova entrata <span class="mc" onclick="closeModal('m-ae')"><i class="ti ti-x"></i></span></div>
+  <div class="fg-grp">
+    <label class="fg-lbl">Categoria</label>
+    <select class="fi" id="ae-cat" onchange="checkCustom('ae')">
+      <option>Contributi e incentivi</option><option>Proventi finanziari</option>
+      <option>Vendita attrezzature</option><option>Rimborsi assicurativi</option>
+      <option value="__new__">+ Nuova categoria...</option>
+    </select>
+  </div>
+  <div id="ae-custom" class="fg-grp" style="display:none"><label class="fg-lbl">Nome categoria</label><input class="fi" id="ae-custom-nm" placeholder="es. Bonus edilizi..."></div>
+  <div class="fr2">
+    <div class="fg-grp"><label class="fg-lbl">Importo (€)</label><input class="fi fi-num" id="ae-imp" type="text" inputmode="numeric" placeholder="0" oninput="fmtInput(this)"></div>
+    <div class="fg-grp"><label class="fg-lbl">Data</label><input class="fi" id="ae-data" type="date"></div>
+  </div>
+  <div class="fg-grp"><label class="fg-lbl">Descrizione</label><input class="fi" id="ae-nota" placeholder="es. Contributo Regione Lombardia bando X"></div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-ae')">Annulla</button><button class="btn btn-primary" onclick="saveAltEntrata()">Salva</button></div>
+</div></div>
+
+<!-- MODAL rinomina -->
+<div id="m-rename" class="modal-ov"><div class="modal" style="width:380px">
+  <div class="modal-hd">Rinomina categoria <span class="mc" onclick="closeModal('m-rename')"><i class="ti ti-x"></i></span></div>
+  <div class="fg-grp"><label class="fg-lbl">Nuovo nome</label><input class="fi" id="rename-inp"></div>
+  <div class="fa-row"><button class="btn" onclick="closeModal('m-rename')">Annulla</button><button class="btn btn-primary" onclick="saveRename()">Rinomina</button></div>
+</div></div>
+
+<script>
+const CAT_DEF={A1:'Manodopera diretta',A2:'Materiali',A3:'Subappalti',A4:'Mezzi e attrezzature',A5:'Sicurezza cantiere',A6:'Costi amministrativi commessa'};
+let S={commesse:[],struttura:[],entrate:[],catNomi:{...CAT_DEF},vcCtx:null,editCtx:null,renameCtx:null,period:'ytd',customM:null,customY:null};
+let chartInst=null;
+
+try{const d=localStorage.getItem('sv3');if(d){const p=JSON.parse(d);Object.assign(S,p);S.catNomi={...CAT_DEF,...(p.catNomi||{})};}}catch(e){}
+
+function save(){try{localStorage.setItem('sv3',JSON.stringify(S));}catch(e){}}
+function uid(){return 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmt(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0);}
+function fmtPct(n,d=1){return(+(n||0)).toFixed(d)+'%';}
+
+/* ---- formattazione input numerici ---- */
+function fmtInput(el){
+  const raw=el.value.replace(/\D/g,'');
+  const num=parseInt(raw||'0',10);
+  el.value=num===0?'':new Intl.NumberFormat('it-IT').format(num);
+  el.dataset.raw=raw;
+}
+function parseInput(el){return parseInt((el.dataset.raw||el.value.replace(/\D/g,''))||'0',10);}
+function setInputVal(el,n){
+  const num=Math.round(n||0);
+  el.value=num===0?'':new Intl.NumberFormat('it-IT').format(num);
+  el.dataset.raw=String(num);
+}
+
+const MONTHS=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+const NOW=new Date();const CY=NOW.getFullYear();const CM=NOW.getMonth();
+
+function parseDM(ds){if(!ds)return null;const p=ds.split('-');return{y:+p[0],m:+p[1]-1};}
+
+function inPeriod(ds){
+  if(!ds)return false;
+  const d=parseDM(ds);if(!d)return false;
+  // mese specifico selezionato
+  if(S.period==='custom'&&S.customM!==null&&S.customY!==null)return d.y===S.customY&&d.m===S.customM;
+  if(S.period==='ytd')return d.y===CY;
+  if(S.period==='q'){const q=Math.floor(CM/3);return d.y===CY&&Math.floor(d.m/3)===q;}
+  if(S.period==='h'){const h=CM>=6?1:0;return d.y===CY&&(h===1?d.m>=6:d.m<6);}
+  if(S.period==='m')return d.y===CY&&d.m===CM;
+  return true;
+}
+
+/* ---- RILEVAMENTO CONFIGURAZIONE MANODOPERA ---- */
+function detectConfig(){
+  // manodopera in commesse = categoria A1 con voci
+  let manoInComm=0;
+  S.commesse.forEach(c=>{manoInComm+=(c.costi_voci['A1']||[]).reduce((s,v)=>s+v.importo,0);});
+  // personale in struttura = categoria "Personale", tutti
+  let persStrTot=0,persStrAmm=0,persStrOp=0;
+  S.struttura.filter(v=>v.cat==='Personale').forEach(v=>{
+    persStrTot+=v.importo;
+    if(v.isAmm)persStrAmm+=v.importo;
+    else persStrOp+=v.importo;
+  });
+  // configurazione
+  if(manoInComm>0&&persStrOp>0)return 'misto';
+  if(manoInComm>0&&persStrOp===0)return 'commesse';   // manodopera solo in commesse
+  if(persStrOp>0&&manoInComm===0)return 'struttura';  // personale operativo solo in struttura
+  return 'no-personale'; // nessun personale inserito
+}
+
+function calcAz(){
+  let fat=0,fatP=0,costiDir=0,costiDirP=0,totInc=0;
+  S.commesse.forEach(c=>{
+    c.sal_voci.forEach(v=>{fat+=v.importo;if(inPeriod(v.data))fatP+=v.importo;});
+    c.incassato_voci.forEach(v=>{totInc+=v.importo;});
+    Object.keys(c.costi_voci||{}).forEach(k=>{
+      (c.costi_voci[k]||[]).forEach(v=>{costiDir+=v.importo;if(inPeriod(v.data))costiDirP+=v.importo;});
+    });
+  });
+  let strP=0,strTot=0,strPAmm=0,strTotAmm=0,strPOp=0,strTotOp=0;
+  S.struttura.forEach(v=>{
+    strTot+=v.importo;
+    if(v.isAmm){strTotAmm+=v.importo;if(inPeriod(v.data))strPAmm+=v.importo;}
+    else{strTotOp+=v.importo;if(inPeriod(v.data))strPOp+=v.importo;}
+    if(inPeriod(v.data))strP+=v.importo;
+  });
+  const aeP=S.entrate.filter(v=>inPeriod(v.data)).reduce((s,v)=>s+v.importo,0);
+  const aeTot=S.entrate.reduce((s,v)=>s+v.importo,0);
+  const margLordoP=fatP-costiDirP;
+  const ebitdaP=margLordoP-strP+aeP;
+  const sni=fat-totInc;
+  const dso=fat>0?Math.round(sni/fat*365):0;
+  // struttura senza personale amm per benchmark
+  const strBench=strP-strPAmm;
+  const strBenchPct=fatP>0?strBench/fatP*100:0;
+  return{fat,fatP,costiDir,costiDirP,strP,strTot,strPAmm,strPOp,strBench,strBenchPct,
+    aeP,aeTot,margLordoP,ebitdaP,sni,totInc,dso,
+    margLordoPct:fatP>0?margLordoP/fatP*100:0,
+    ebitdaPct:fatP>0?ebitdaP/fatP*100:0,
+    strPct:fatP>0?strP/fatP*100:0
+  };
+}
+
+function calcComm(c){
+  const sal=c.sal_voci.reduce((s,v)=>s+v.importo,0);
+  const inc=c.incassato_voci.reduce((s,v)=>s+v.importo,0);
+  const salP=c.sal_voci.filter(v=>inPeriod(v.data)).reduce((s,v)=>s+v.importo,0);
+  let costiDir=0;
+  Object.keys(c.costi_voci||{}).forEach(k=>{costiDir+=(c.costi_voci[k]||[]).reduce((s,v)=>s+v.importo,0);});
+  return{sal,inc,salP,costiDir,margine:sal>0?(sal-costiDir)/sal*100:0,avanz:c.contratto>0?sal/c.contratto*100:0,sni:sal-inc};
+}
+
+function getMonthly(year){
+  return Array.from({length:12},(_,m)=>{
+    let fat=0,costi=0,str=0,ae=0;
+    S.commesse.forEach(c=>{
+      c.sal_voci.forEach(v=>{const d=parseDM(v.data);if(d&&d.y===year&&d.m===m)fat+=v.importo;});
+      Object.keys(c.costi_voci||{}).forEach(k=>{(c.costi_voci[k]||[]).forEach(v=>{const d=parseDM(v.data);if(d&&d.y===year&&d.m===m)costi+=v.importo;});});
+    });
+    S.struttura.forEach(v=>{const d=parseDM(v.data);if(d&&d.y===year&&d.m===m)str+=v.importo;});
+    S.entrate.forEach(v=>{const d=parseDM(v.data);if(d&&d.y===year&&d.m===m)ae+=v.importo;});
+    return{fat,costi,str,ae,ebitda:fat-costi-str+ae};
+  });
+}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelector(`.nav[onclick*="${p}"]`).classList.add('active');
+  if(p==='dashboard')renderDashboard();
+  if(p==='commesse')renderCommList();
+  if(p==='struttura')renderStruttura();
+  if(p==='entrate')renderEntrate();
+  if(p==='benchmark')renderBenchmark();
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ---- PERIODO: preset + selettore mese specifico ---- */
+function buildPeriodBar(){
+  const bar=document.getElementById('period-bar');
+  const isCustom=S.period==='custom';
+  // anni disponibili
+  const yrs=new Set([CY]);
+  [...S.commesse.flatMap(c=>[...c.sal_voci,...c.incassato_voci]),...S.struttura,...S.entrate].forEach(v=>{const d=parseDM(v.data);if(d)yrs.add(d.y);});
+  const yrOpts=[...yrs].sort((a,b)=>b-a).map(y=>`<option value="${y}"${y===(S.customY||CY)?'selected':''}>${y}</option>`).join('');
+  const mOpts=MONTHS.map((l,i)=>`<option value="${i}"${i===(S.customM!==null?S.customM:CM)?'selected':''}>${l}</option>`).join('');
+  bar.innerHTML=`
+    <button class="period-btn${S.period==='m'?' active':''}" onclick="setPeriod('m')">Mese corrente</button>
+    <button class="period-btn${S.period==='q'?' active':''}" onclick="setPeriod('q')">Trimestre</button>
+    <button class="period-btn${S.period==='h'?' active':''}" onclick="setPeriod('h')">Semestre</button>
+    <button class="period-btn${S.period==='ytd'?' active':''}" onclick="setPeriod('ytd')">Anno</button>
+    <button class="period-btn${S.period==='all'?' active':''}" onclick="setPeriod('all')">Tutto</button>
+    <div class="period-sep"></div>
+    <div class="period-custom">
+      <label style="font-size:11px;color:var(--mu)">Mese:</label>
+      <select class="${isCustom?'fi month-chart-sel sel-active':'fi month-chart-sel'}" style="padding:4px 8px;font-size:12px" id="sel-m" onchange="setCustomPeriod()">${mOpts}</select>
+      <select class="${isCustom?'fi month-chart-sel sel-active':'fi month-chart-sel'}" style="padding:4px 8px;font-size:12px" id="sel-y" onchange="setCustomPeriod()">${yrOpts}</select>
+    </div>
+  `;
+}
+function setPeriod(p){S.period=p;S.customM=null;S.customY=null;save();renderDashboard();}
+function setCustomPeriod(){
+  S.period='custom';
+  S.customM=+document.getElementById('sel-m').value;
+  S.customY=+document.getElementById('sel-y').value;
+  save();renderDashboard();
+}
+
+/* ---- DASHBOARD ---- */
+function renderDashboard(){
+  buildPeriodBar();
+  const a=calcAz();
+  const cfg=detectConfig();
+
+  // alert configurazione
+  const cfgEl=document.getElementById('dash-config-alert');
+  if(cfg==='misto'){
+    cfgEl.innerHTML=`<div class="alert-box"><i class="ti ti-alert-triangle" style="vertical-align:-2px;margin-right:5px"></i><strong>Configurazione mista rilevata</strong> — manodopera presente sia nelle commesse (cat. A1) sia in Struttura → Personale operativo. Il benchmark incidenza struttura non è direttamente comparabile con i dati di settore. Considera di uniformare la configurazione.</div>`;
+  } else {
+    cfgEl.innerHTML='';
+  }
+
+  // KPI
+  document.getElementById('dash-kpi').innerHTML=[
+    {l:'Fatturato SAL',v:fmt(a.fatP),s:'solo ricavi da commesse',cls:''},
+    {l:'Margine lordo commesse',v:fmtPct(a.margLordoPct),s:fmt(a.margLordoP),cls:a.margLordoPct>=25?'ok':a.margLordoPct>=15?'warn':'bad'},
+    {l:'EBITDA',v:fmtPct(a.ebitdaPct),s:fmt(a.ebitdaP)+' (incl. altre entrate)',cls:a.ebitdaPct>=5?'ok':a.ebitdaPct>=2?'warn':'bad'},
+    {l:'SAL non incassati',v:fmt(a.sni),s:'esposizione crediti totale',cls:a.sni>100000?'warn':''},
+  ].map(k=>`<div class="stat"><div class="stat-lbl">${k.l}</div><div class="stat-val ${k.cls}">${k.v}</div><div class="stat-sub">${k.s}</div></div>`).join('');
+
+  // Grafico
+  const yrSel=document.getElementById('dash-year-sel');
+  const selY=yrSel.value?+yrSel.value:CY;
+  if(!yrSel.innerHTML){
+    const yrs=new Set([CY]);
+    [...S.commesse.flatMap(c=>[...c.sal_voci,...c.incassato_voci]),...S.struttura,...S.entrate].forEach(v=>{const d=parseDM(v.data);if(d)yrs.add(d.y);});
+    yrSel.innerHTML=[...yrs].sort((a,b)=>b-a).map(y=>`<option value="${y}"${y===CY?' selected':''}>${y}</option>`).join('');
+  }
+  const monthly=getMonthly(selY);
+  if(chartInst)chartInst.destroy();
+  chartInst=new Chart(document.getElementById('chart-mensile').getContext('2d'),{
+    data:{labels:MONTHS,datasets:[
+      {type:'bar',label:'Fatturato SAL',data:monthly.map(r=>r.fat),backgroundColor:'rgba(79,127,255,0.35)',borderColor:'rgba(79,127,255,0.7)',borderWidth:1},
+      {type:'bar',label:'Altre entrate',data:monthly.map(r=>r.ae),backgroundColor:'rgba(61,186,126,0.25)',borderColor:'rgba(61,186,126,0.6)',borderWidth:1},
+      {type:'bar',label:'Costi diretti',data:monthly.map(r=>r.costi),backgroundColor:'rgba(224,90,90,0.25)',borderColor:'rgba(224,90,90,0.55)',borderWidth:1},
+      {type:'bar',label:'Struttura',data:monthly.map(r=>r.str),backgroundColor:'rgba(232,169,64,0.25)',borderColor:'rgba(232,169,64,0.55)',borderWidth:1},
+      {type:'line',label:'EBITDA',data:monthly.map(r=>r.ebitda),borderColor:'#3dba7e',backgroundColor:'rgba(61,186,126,0.06)',borderWidth:2,pointRadius:3,tension:0.3,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b90a0',font:{size:11},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.raw)}`}}},
+      scales:{x:{ticks:{color:'#8b90a0',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#8b90a0',font:{size:10},callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}}}
+    }
+  });
+
+  // Cashflow
+  document.getElementById('dash-cashflow').innerHTML=`
+    <div class="bench-row"><div class="dot" style="background:${a.dso<=80?'var(--gn)':a.dso<=120?'var(--am)':'var(--rd)'}"></div><div><div class="bench-lbl">DSO — giorni incasso</div><div class="bench-note">benchmark: ≤80gg ✅</div></div><div class="bench-val ${a.dso<=80?'ok':a.dso<=120?'warn':'bad'}">${a.dso}gg</div></div>
+    <div class="bench-row"><div class="dot" style="background:var(--mu)"></div><div class="bench-lbl">SAL totali emessi</div><div class="bench-val">${fmt(a.fat)}</div></div>
+    <div class="bench-row"><div class="dot" style="background:var(--mu)"></div><div class="bench-lbl">Totale incassato</div><div class="bench-val">${fmt(a.totInc)}</div></div>
+    <div class="bench-row"><div class="dot" style="background:${a.sni>100000?'var(--am)':'var(--mu)'}"></div><div class="bench-lbl">Esposizione crediti</div><div class="bench-val ${a.sni>100000?'warn':''}">${fmt(a.sni)}</div></div>
+    <div class="bench-row"><div class="dot" style="background:var(--gn)"></div><div><div class="bench-lbl">Altre entrate (periodo)</div><div class="bench-note">proventi accessori — non nel fatturato</div></div><div class="bench-val ok">${fmt(a.aeP)}</div></div>
+  `;
+
+  // Commesse attive
+  const att=S.commesse.filter(c=>c.stato==='attiva');
+  document.getElementById('dash-comm-list').innerHTML=att.length?att.slice(0,5).map(c=>{
+    const r=calcComm(c);const fw=Math.min(100,Math.max(0,r.avanz));
+    return`<div class="comm-row" onclick="openCommessa('${c.id}')"><div style="flex:1"><div style="font-weight:500;font-size:13.5px">${c.nome}</div><div style="font-size:11px;color:var(--mu);margin-top:1px">${fmt(r.sal)} SAL · ${fmtPct(r.avanz,0)} avanz.</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700" class="${r.margine>=25?'ok':r.margine>=15?'warn':'bad'}">${fmtPct(r.margine,1)}</div><div style="font-size:10px;color:var(--mu)">margine</div></div></div><div class="prog"><div class="prog-f ${fw>=80?'fg':fw>=40?'fa':'fb'}" style="width:${fw}%"></div></div>`;
+  }).join(''):'<div class="empty" style="padding:20px"><i class="ti ti-building-warehouse"></i><p>Nessuna commessa attiva</p></div>';
+
+  // CE
+  document.getElementById('dash-ce').innerHTML=[
+    ['Fatturato SAL (periodo)',a.fatP,''],
+    ['— Costi diretti commesse',a.costiDirP,'var(--mu)'],
+    ['= Margine lordo commesse',a.margLordoP,a.margLordoP>=0?'var(--gn)':'var(--rd)'],
+    ['— Costi struttura',a.strP,'var(--mu)'],
+    ['+ Altre entrate',a.aeP,'var(--gn)'],
+    ['= EBITDA',a.ebitdaP,a.ebitdaP>=0?'var(--gn)':'var(--rd)'],
+  ].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--brd);font-size:13px"><span style="color:${c||'var(--tx)'}">${l}</span><span style="font-weight:600;color:${c||'var(--tx)'}">${fmt(v)}</span></div>`).join('');
+
+  // Benchmark struttura adattivo alla configurazione
+  let strBenchRef,strBenchOk,strBenchWarn,strBenchNote;
+  if(cfg==='struttura'){
+    strBenchRef='35–45%';strBenchNote='⚠ personale operativo in struttura — benchmark da verificare [Non verificato]';
+    strBenchOk=a.strPct<=45;strBenchWarn=a.strPct<=55;
+  } else if(cfg==='misto'){
+    strBenchRef='N/D';strBenchNote='⚠ configurazione mista — benchmark non comparabile';
+    strBenchOk=false;strBenchWarn=true;
+  } else {
+    strBenchRef='13–17%';strBenchNote='✅ struttura (excl. personale operativo) — prezzari regionali';
+    strBenchOk=a.strBenchPct<=17;strBenchWarn=a.strBenchPct<=22;
+  }
+
+  // Allerta
+  const alerts=[];
+  if(cfg==='misto')alerts.push({ico:'ti-alert-triangle',cls:'warn',txt:'Configurazione mista manodopera — uniformare per confronto benchmark affidabile.'});
+  if(a.margLordoPct<15&&a.fatP>0)alerts.push({ico:'ti-alert-triangle',cls:'bad',txt:`Margine lordo ${fmtPct(a.margLordoPct,1)} — sotto soglia critica 15%. Benchmark: 25–35%.`});
+  else if(a.margLordoPct<25&&a.fatP>0)alerts.push({ico:'ti-alert-triangle',cls:'warn',txt:`Margine lordo ${fmtPct(a.margLordoPct,1)} — sotto benchmark (25–35%). Verificare costi diretti.`});
+  if(a.dso>120)alerts.push({ico:'ti-alert-triangle',cls:'bad',txt:`DSO ${a.dso}gg — rischio liquidità elevato. Benchmark: ≤80gg.`});
+  else if(a.dso>80)alerts.push({ico:'ti-info-circle',cls:'warn',txt:`DSO ${a.dso}gg — superiore al benchmark (80gg). Monitorare flusso di cassa.`});
+  if(a.ebitdaPct<0&&a.fatP>0)alerts.push({ico:'ti-alert-triangle',cls:'bad',txt:`EBITDA negativo (${fmtPct(a.ebitdaPct,1)}). Perdita operativa nel periodo.`});
+  if(!alerts.length)alerts.push({ico:'ti-circle-check',cls:'ok',txt:'Tutti i KPI nel range benchmark. Nessuna anomalia rilevata nel periodo selezionato.'});
+  document.getElementById('dash-allerta').innerHTML=alerts.map(a=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--brd)"><i class="ti ${a.ico} ${a.cls}" style="font-size:16px;flex-shrink:0;margin-top:1px"></i><span style="font-size:13px;line-height:1.5">${a.txt}</span></div>`).join('');
+}
+
+/* ---- COMMESSE ---- */
+function renderCommList(){
+  document.getElementById('comm-detail').style.display='none';
+  document.getElementById('comm-list-view').style.display='';
+  if(!S.commesse.length){document.getElementById('comm-list-view').innerHTML='<div class="empty" style="padding:60px 20px"><i class="ti ti-building-warehouse"></i><p>Nessuna commessa. Creane una per iniziare.</p></div>';return;}
+  document.getElementById('comm-list-view').innerHTML=S.commesse.map(c=>{
+    const r=calcComm(c);const fw=Math.min(100,Math.max(0,r.avanz));
+    const bcls=c.stato==='attiva'?'bdg-gn':c.stato==='completata'?'bdg-bl':'bdg-am';
+    return`<div class="card" style="margin-bottom:11px;cursor:pointer" onclick="openCommessa('${c.id}')">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div><div style="font-size:15px;font-weight:600;margin-bottom:3px">${c.nome}</div><div style="font-size:12px;color:var(--mu)">${c.dataApertura||'—'} · Contratto ${fmt(c.contratto)} · Budget ${fmt(c.budget)}</div></div>
+        <span class="badge ${bcls}">${c.stato}</span>
+      </div>
+      <div style="display:flex;gap:18px;margin-bottom:10px">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:2px">Margine lordo</div><div style="font-size:17px;font-weight:700" class="${r.margine>=25?'ok':r.margine>=15?'warn':'bad'}">${fmtPct(r.margine,1)}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:2px">SAL emessi</div><div style="font-size:17px;font-weight:700">${fmt(r.sal)}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:2px">Non incassato</div><div style="font-size:17px;font-weight:700">${fmt(r.sni)}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mu);margin-bottom:2px">Budget rimasto</div><div style="font-size:17px;font-weight:700" class="${c.budget-r.costiDir<0?'bad':'ok'}">${fmt(c.budget-r.costiDir)}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:3px">Avanzamento ${fmtPct(r.avanz,0)}</div>
+      <div class="prog"><div class="prog-f ${fw>=80?'fg':fw>=40?'fa':'fb'}" style="width:${fw}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function openCommessa(id){
+  const c=S.commesse.find(x=>x.id===id);if(!c)return;
+  document.getElementById('comm-list-view').style.display='none';
+  const det=document.getElementById('comm-detail');det.style.display='';
+  const r=calcComm(c);const bud=c.budget-r.costiDir;
+  const voceHtml=(v,i,tipo)=>`<div class="voce-row">
+    <div style="flex:1"><div style="font-size:13px">${v.nota||'—'}</div><div style="font-size:11px;color:var(--mu);margin-top:1px">${v.data||'—'}</div></div>
+    <div class="voce-imp">${fmt(v.importo)}</div>
+    <span class="voce-act" onclick="openEdit('${id}','${tipo}',${i})"><i class="ti ti-pencil"></i></span>
+    <span class="voce-act" onclick="delVoce('${id}','${tipo}',${i})"><i class="ti ti-trash"></i></span>
+  </div>`;
+  const noV=()=>'<div style="font-size:12px;color:var(--mu);padding:6px 0">Nessuna voce inserita</div>';
+  const catBlock=(k)=>{
+    const voci=c.costi_voci[k]||[];
+    const tot=voci.reduce((s,v)=>s+v.importo,0);
+    return`<div class="cat-blk">
+      <div class="cat-hd">
+        <div class="cat-nm"><i class="ti ti-tag" style="font-size:13px;color:var(--mu)"></i>${S.catNomi[k]||CAT_DEF[k]||k}<span class="cat-ren" onclick="event.stopPropagation();openRename('${id}','${k}')"><i class="ti ti-pencil" style="font-size:11px"></i> rinomina</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><span class="cat-tot">${fmt(tot)}</span><button class="btn btn-sm" onclick="openVoceComm('${id}','${k}')"><i class="ti ti-plus"></i> Aggiungi</button></div>
+      </div>
+      ${k==='A1'?'<div class="mano-warn"><i class="ti ti-alert-triangle"></i> Se questa manodopera è già in Struttura → Personale operativo, evita doppio conteggio.</div>':''}
+      ${voci.length?voci.map((v,i)=>voceHtml(v,i,k)).join(''):noV()}
+    </div>`;
+  };
+  const allCats=['A1','A2','A3','A4','A5','A6',...Object.keys(c.costi_voci||{}).filter(k=>!['A1','A2','A3','A4','A5','A6'].includes(k))];
+  det.innerHTML=`
+    <div class="back" onclick="renderCommList()"><i class="ti ti-arrow-left"></i> Tutte le commesse</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div><div style="font-size:19px;font-weight:700">${c.nome}</div><div style="font-size:12px;color:var(--mu);margin-top:3px">${c.dataApertura||'—'} · Contratto ${fmt(c.contratto)} · Budget ${fmt(c.budget)}</div></div>
+      <button class="btn btn-danger btn-sm" onclick="deleteComm('${id}')"><i class="ti ti-trash"></i> Elimina</button>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-box"><small>Margine lordo</small><strong class="${r.margine>=25?'ok':r.margine>=15?'warn':'bad'}">${fmtPct(r.margine,1)}</strong></div>
+      <div class="kpi-box"><small>SAL emessi</small><strong>${fmt(r.sal)}</strong></div>
+      <div class="kpi-box"><small>Costi diretti</small><strong>${fmt(r.costiDir)}</strong></div>
+      <div class="kpi-box"><small>Non incassato</small><strong class="${r.sni>20000?'warn':''}">${fmt(r.sni)}</strong></div>
+      <div class="kpi-box"><small>Avanzamento</small><strong>${fmtPct(r.avanz,0)}</strong></div>
+      <div class="kpi-box"><small>Budget rimasto</small><strong class="${bud<0?'bad':'ok'}">${fmt(bud)}</strong></div>
+    </div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card"><div class="sec-hd"><span class="sec-ttl">SAL emessi</span><button class="btn btn-sm" onclick="openVoceComm('${id}','sal')"><i class="ti ti-plus"></i> Aggiungi SAL</button></div>${c.sal_voci.length?c.sal_voci.map((v,i)=>voceHtml(v,i,'sal')).join(''):noV()}</div>
+      <div class="card"><div class="sec-hd"><span class="sec-ttl">Incassi</span><button class="btn btn-sm" onclick="openVoceComm('${id}','inc')"><i class="ti ti-plus"></i> Aggiungi</button></div>${c.incassato_voci.length?c.incassato_voci.map((v,i)=>voceHtml(v,i,'inc')).join(''):noV()}</div>
+    </div>
+    ${allCats.map(k=>catBlock(k)).join('')}
+    <div class="cat-blk" style="border-style:dashed;border-color:rgba(79,127,255,.3)">
+      <div class="cat-hd"><div class="cat-nm" style="color:var(--acc)"><i class="ti ti-plus" style="font-size:13px"></i>Nuova categoria personalizzata</div><button class="btn btn-sm" onclick="addCatComm('${id}')"><i class="ti ti-plus"></i> Aggiungi</button></div>
+      <div style="font-size:12px;color:var(--mu)">Crea una voce specifica per questo cantiere (es. sondaggi, noli speciali, smaltimento...).</div>
+    </div>
+  `;
+}
+
+function openVoceComm(id,tipo){
+  S.vcCtx={id,tipo};
+  const isCosto=tipo!=='sal'&&tipo!=='inc';
+  const catNome=CAT_DEF[tipo]||(S.catNomi[tipo]||tipo);
+  document.getElementById('m-vc-title').innerHTML=`${tipo==='sal'?'Aggiungi SAL':tipo==='inc'?'Aggiungi incasso':'Aggiungi — '+catNome} <span class="mc" onclick="closeModal('m-vc')"><i class="ti ti-x"></i></span>`;
+  document.getElementById('m-vc-mano-warn').style.display=tipo==='A1'?'block':'none';
+  document.getElementById('m-vc-rp-info').style.display=isCosto?'block':'none';
+  document.getElementById('m-vc-rp-toggle').style.display=isCosto?'block':'none';
+  document.getElementById('rp-check').checked=false;
+  document.getElementById('m-vc-normale').style.display='';
+  document.getElementById('m-vc-ripart').style.display='none';
+  const vi=document.getElementById('vc-imp');vi.value='';delete vi.dataset.raw;
+  document.getElementById('vc-data').value=today();
+  document.getElementById('vc-nota').value='';
+  openModal('m-vc');
+}
+
+function toggleRipart(){
+  const on=document.getElementById('rp-check').checked;
+  document.getElementById('m-vc-normale').style.display=on?'none':'';
+  document.getElementById('m-vc-ripart').style.display=on?'':'none';
+  if(on){document.getElementById('rp-data').value=today();document.getElementById('rp-rows').innerHTML='';addRpRow();addRpRow();aggRipart();}
+}
+function addRpRow(){
+  const opts=S.commesse.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  const r=document.createElement('div');r.className='rp-row';
+  r.innerHTML=`<select>${opts}</select><input type="text" inputmode="numeric" placeholder="€" oninput="fmtInput(this);aggRipart()" style="width:110px"><span class="voce-act" onclick="this.parentElement.remove();aggRipart()"><i class="ti ti-x" style="font-size:12px"></i></span>`;
+  document.getElementById('rp-rows').appendChild(r);
+}
+function aggRipart(){
+  const tot=parseInput(document.getElementById('rp-tot-inp'));
+  let sum=0;document.querySelectorAll('#rp-rows .rp-row').forEach(r=>{sum+=parseInput(r.querySelector('input'));});
+  const el=document.getElementById('rp-check-tot');const ok=Math.abs(tot-sum)<1;
+  el.className='rp-tot'+(tot===0?'':ok?' ok':' err');
+  el.textContent=tot===0?'':`Assegnato: ${fmt(sum)} / ${fmt(tot)} ${ok?'✓':'— differenza: '+fmt(tot-sum)}`;
+}
+function saveVoce(){
+  const ctx=S.vcCtx;if(!ctx)return;
+  const c=S.commesse.find(x=>x.id===ctx.id);if(!c)return;
+  const isCosto=ctx.tipo!=='sal'&&ctx.tipo!=='inc';
+  const isRp=isCosto&&document.getElementById('rp-check').checked;
+  if(isRp){
+    const tot=parseInput(document.getElementById('rp-tot-inp'));
+    const nota=document.getElementById('rp-nota').value;const data=document.getElementById('rp-data').value;
+    document.querySelectorAll('#rp-rows .rp-row').forEach(row=>{
+      const cid=row.querySelector('select').value;const imp=parseInput(row.querySelector('input'));
+      if(imp<=0)return;const tc=S.commesse.find(x=>x.id===cid);if(!tc)return;
+      if(!tc.costi_voci[ctx.tipo])tc.costi_voci[ctx.tipo]=[];
+      tc.costi_voci[ctx.tipo].push({importo:imp,nota:`${nota} (ripart. ${fmt(tot)})`,data,id:uid()});
+    });
+  } else {
+    const imp=parseInput(document.getElementById('vc-imp'));
+    if(imp<=0){alert('Inserisci un importo valido');return;}
+    const voce={importo:imp,nota:document.getElementById('vc-nota').value,data:document.getElementById('vc-data').value,id:uid()};
+    if(ctx.tipo==='sal')c.sal_voci.push(voce);
+    else if(ctx.tipo==='inc')c.incassato_voci.push(voce);
+    else{if(!c.costi_voci[ctx.tipo])c.costi_voci[ctx.tipo]=[];c.costi_voci[ctx.tipo].push(voce);}
+  }
+  save();closeModal('m-vc');openCommessa(ctx.id);
+}
+
+function openEdit(commId,tipo,idx){
+  const c=S.commesse.find(x=>x.id===commId);if(!c)return;
+  let voce;
+  if(tipo==='sal')voce=c.sal_voci[idx];
+  else if(tipo==='inc')voce=c.incassato_voci[idx];
+  else voce=(c.costi_voci[tipo]||[])[idx];
+  if(!voce)return;
+  S.editCtx={commId,tipo,idx};
+  document.getElementById('m-edit-title').innerHTML=`Modifica voce <span class="mc" onclick="closeModal('m-edit')"><i class="ti ti-x"></i></span>`;
+  setInputVal(document.getElementById('edit-imp'),voce.importo);
+  document.getElementById('edit-data').value=voce.data||today();
+  document.getElementById('edit-nota').value=voce.nota||'';
+  document.getElementById('edit-save-btn').onclick=saveEdit;
+  openModal('m-edit');
+}
+function saveEdit(){
+  const ctx=S.editCtx;if(!ctx)return;
+  const imp=parseInput(document.getElementById('edit-imp'));
+  if(imp<=0){alert('Importo non valido');return;}
+  const upd={importo:imp,nota:document.getElementById('edit-nota').value,data:document.getElementById('edit-data').value};
+  const c=S.commesse.find(x=>x.id===ctx.commId);if(!c)return;
+  if(ctx.tipo==='sal')Object.assign(c.sal_voci[ctx.idx],upd);
+  else if(ctx.tipo==='inc')Object.assign(c.incassato_voci[ctx.idx],upd);
+  else Object.assign((c.costi_voci[ctx.tipo]||[])[ctx.idx],upd);
+  save();closeModal('m-edit');openCommessa(ctx.commId);
+}
+function delVoce(commId,tipo,idx){
+  if(!confirm('Eliminare questa voce?'))return;
+  const c=S.commesse.find(x=>x.id===commId);if(!c)return;
+  if(tipo==='sal')c.sal_voci.splice(idx,1);
+  else if(tipo==='inc')c.incassato_voci.splice(idx,1);
+  else if(c.costi_voci[tipo])c.costi_voci[tipo].splice(idx,1);
+  save();openCommessa(commId);
+}
+function deleteComm(id){if(!confirm('Eliminare definitivamente?'))return;S.commesse=S.commesse.filter(x=>x.id!==id);save();renderCommList();}
+function addCatComm(commId){
+  const nome=prompt('Nome della nuova categoria:');if(!nome||!nome.trim())return;
+  const k='C'+uid().slice(0,6);S.catNomi[k]=nome.trim();
+  const c=S.commesse.find(x=>x.id===commId);if(c&&!c.costi_voci[k])c.costi_voci[k]=[];
+  save();openCommessa(commId);
+}
+function openRename(commId,k){
+  S.renameCtx={commId,k};
+  document.getElementById('rename-inp').value=S.catNomi[k]||CAT_DEF[k]||'';
+  openModal('m-rename');
+}
+function saveRename(){
+  const ctx=S.renameCtx;if(!ctx)return;
+  const v=document.getElementById('rename-inp').value.trim();
+  if(v)S.catNomi[ctx.k]=v;
+  save();closeModal('m-rename');openCommessa(ctx.commId);
+}
+function saveCommessa(){
+  const nome=document.getElementById('nc-nome').value.trim();if(!nome){alert('Inserisci il nome');return;}
+  const c={id:uid(),nome,contratto:parseInput(document.getElementById('nc-contr')),budget:parseInput(document.getElementById('nc-budg')),dataApertura:document.getElementById('nc-data').value||today(),stato:document.getElementById('nc-stato').value,sal_voci:[],incassato_voci:[],costi_voci:{A1:[],A2:[],A3:[],A4:[],A5:[],A6:[]},budget_voci:{}};
+  S.commesse.push(c);save();closeModal('m-nc');renderCommList();
+  ['nc-nome','nc-contr','nc-budg'].forEach(id=>{const el=document.getElementById(id);el.value='';delete el.dataset.raw;});
+}
+
+/* ---- STRUTTURA ---- */
+function checkCustom(pfx){document.getElementById(pfx+'-custom').style.display=document.getElementById(pfx+'-cat').value==='__new__'?'block':'none';}
+function checkPersonale(){
+  const v=document.getElementById('cs-cat').value;
+  document.getElementById('cs-flag-amm-wrap').style.display=v==='Personale'?'block':'none';
+  if(v!=='Personale')document.getElementById('cs-flag-amm').checked=false;
+}
+
+function renderStruttura(){
+  const cats={};S.struttura.forEach(v=>{if(!cats[v.cat])cats[v.cat]=[];cats[v.cat].push(v);});
+  if(!Object.keys(cats).length){document.getElementById('struttura-cats').innerHTML='<div class="empty" style="padding:60px 20px"><i class="ti ti-receipt"></i><p>Nessun costo inserito.</p></div>';return;}
+  document.getElementById('struttura-cats').innerHTML=Object.entries(cats).map(([cat,voci])=>{
+    const tot=voci.reduce((s,v)=>s+v.importo,0);
+    const ammTot=voci.filter(v=>v.isAmm).reduce((s,v)=>s+v.importo,0);
+    const isPersonale=cat==='Personale';
+    return`<div class="cat-blk">
+      <div class="cat-hd">
+        <div class="cat-nm"><i class="ti ti-tag" style="font-size:13px;color:var(--mu)"></i>${cat}${isPersonale&&ammTot>0?`<span style="font-size:10px;color:var(--acc);background:rgba(79,127,255,.12);padding:1px 7px;border-radius:10px;margin-left:4px">${fmt(ammTot)} amm.</span>`:''}${isPersonale&&(tot-ammTot)>0?`<span style="font-size:10px;color:var(--am);background:rgba(232,169,64,.12);padding:1px 7px;border-radius:10px;margin-left:4px">${fmt(tot-ammTot)} op.</span>`:''}</div>
+        <span class="cat-tot">${fmt(tot)}</span>
+      </div>
+      ${voci.map((v)=>{const gi=S.struttura.indexOf(v);return`<div class="voce-row"><div style="flex:1"><div style="font-size:13px">${v.nota||'—'}${v.isAmm?'<span style="font-size:10px;color:var(--acc);background:rgba(79,127,255,.12);padding:1px 6px;border-radius:8px;margin-left:5px">amm.</span>':''}</div><div style="font-size:11px;color:var(--mu);margin-top:1px">${v.data||'—'}</div></div><div class="voce-imp">${fmt(v.importo)}</div><span class="voce-act" onclick="openEditStr(${gi})"><i class="ti ti-pencil"></i></span><span class="voce-act" onclick="delStr(${gi})"><i class="ti ti-trash"></i></span></div>`;}).join('')}
+    </div>`;
+  }).join('');
+}
+
+function saveCostoStr(){
+  let cat=document.getElementById('cs-cat').value;
+  if(cat==='__new__'){cat=document.getElementById('cs-custom-nm').value.trim();if(!cat){alert('Inserisci la categoria');return;}}
+  const imp=parseInput(document.getElementById('cs-imp'));if(imp<=0){alert('Importo non valido');return;}
+  const isAmm=cat==='Personale'&&document.getElementById('cs-flag-amm').checked;
+  S.struttura.push({id:uid(),cat,importo:imp,isAmm,nota:document.getElementById('cs-nota').value,data:document.getElementById('cs-data').value||today()});
+  save();closeModal('m-cs');renderStruttura();
+  const el=document.getElementById('cs-imp');el.value='';delete el.dataset.raw;
+  document.getElementById('cs-nota').value='';document.getElementById('cs-custom-nm').value='';
+  document.getElementById('cs-flag-amm').checked=false;
+}
+function openEditStr(i){
+  const v=S.struttura[i];if(!v)return;
+  document.getElementById('m-edit-title').innerHTML=`Modifica costo struttura <span class="mc" onclick="closeModal('m-edit')"><i class="ti ti-x"></i></span>`;
+  setInputVal(document.getElementById('edit-imp'),v.importo);
+  document.getElementById('edit-data').value=v.data||today();
+  document.getElementById('edit-nota').value=v.nota||'';
+  document.getElementById('edit-save-btn').onclick=()=>{
+    const imp=parseInput(document.getElementById('edit-imp'));if(imp<=0){alert('Importo non valido');return;}
+    Object.assign(S.struttura[i],{importo:imp,nota:document.getElementById('edit-nota').value,data:document.getElementById('edit-data').value});
+    save();closeModal('m-edit');renderStruttura();document.getElementById('edit-save-btn').onclick=saveEdit;
+  };
+  openModal('m-edit');
+}
+function delStr(i){if(!confirm('Eliminare?'))return;S.struttura.splice(i,1);save();renderStruttura();}
+
+/* ---- ALTRE ENTRATE ---- */
+function renderEntrate(){
+  if(!S.entrate.length){document.getElementById('entrate-list').innerHTML='<div class="empty" style="padding:60px 20px"><i class="ti ti-cash"></i><p>Nessuna entrata extra inserita.</p></div>';return;}
+  const cats={};S.entrate.forEach(v=>{if(!cats[v.cat])cats[v.cat]=[];cats[v.cat].push(v);});
+  document.getElementById('entrate-list').innerHTML=Object.entries(cats).map(([cat,voci])=>{
+    const tot=voci.reduce((s,v)=>s+v.importo,0);
+    return`<div class="cat-blk"><div class="cat-hd"><div class="cat-nm"><i class="ti ti-cash" style="font-size:13px;color:var(--gn)"></i>${cat}</div><span class="cat-tot ok">${fmt(tot)}</span></div>${voci.map((v)=>{const gi=S.entrate.indexOf(v);return`<div class="voce-row"><div style="flex:1"><div style="font-size:13px">${v.nota||'—'}</div><div style="font-size:11px;color:var(--mu);margin-top:1px">${v.data||'—'}</div></div><div class="voce-imp ok">${fmt(v.importo)}</div><span class="voce-act" onclick="delAE(${gi})"><i class="ti ti-trash"></i></span></div>`;}).join('')}</div>`;
+  }).join('');
+}
+function saveAltEntrata(){
+  let cat=document.getElementById('ae-cat').value;
+  if(cat==='__new__'){cat=document.getElementById('ae-custom-nm').value.trim();if(!cat){alert('Inserisci la categoria');return;}}
+  const imp=parseInput(document.getElementById('ae-imp'));if(imp<=0){alert('Importo non valido');return;}
+  S.entrate.push({id:uid(),cat,importo:imp,nota:document.getElementById('ae-nota').value,data:document.getElementById('ae-data').value||today()});
+  save();closeModal('m-ae');renderEntrate();
+  const el=document.getElementById('ae-imp');el.value='';delete el.dataset.raw;
+  document.getElementById('ae-nota').value='';document.getElementById('ae-custom-nm').value='';
+}
+function delAE(i){if(!confirm('Eliminare?'))return;S.entrate.splice(i,1);save();renderEntrate();}
+
+/* ---- BENCHMARK ---- */
+function renderBenchmark(){
+  const a=calcAz();const cfg=detectConfig();
+  let strRef,strOk,strWarn,strNote,strVal;
+  if(cfg==='struttura'){
+    strRef='35–45%';strNote='⚠ personale operativo in struttura [Non verificato]';
+    strVal=a.fatP>0?fmtPct(a.strPct,1):null;
+    strOk=a.fatP>0&&a.strPct<=45;strWarn=a.fatP>0&&a.strPct<=55;
+  } else if(cfg==='misto'){
+    strRef='N/D';strNote='⚠ configurazione mista — uniformare';
+    strVal='misto';strOk=false;strWarn=true;
+  } else {
+    strRef='13–17%';strNote='✅ struttura excl. personale operativo';
+    strVal=a.fatP>0?fmtPct(a.strBenchPct,1):null;
+    strOk=a.fatP>0&&a.strBenchPct<=17;strWarn=a.fatP>0&&a.strBenchPct<=22;
+  }
+  const rows=[
+    {l:'EBITDA margin',v:a.fat>0?fmtPct(a.ebitdaP/a.fatP*100||0,1):null,ref:'5–8%',ok:a.fatP>0&&a.ebitdaPct>=5,warn:a.fatP>0&&a.ebitdaPct>=2,note:'⚠ inferenza'},
+    {l:'Margine lordo commesse',v:a.fatP>0?fmtPct(a.margLordoPct,1):null,ref:'25–35%',ok:a.fatP>0&&a.margLordoPct>=25,warn:a.fatP>0&&a.margLordoPct>=15,note:'⚠ inferenza'},
+    {l:'Incidenza struttura su fatturato',v:strVal,ref:strRef,ok:strOk,warn:strWarn,note:strNote},
+    {l:'DSO — giorni incasso',v:a.dso>0?a.dso+'gg':null,ref:'≤80gg',ok:a.dso>0&&a.dso<=80,warn:a.dso>0&&a.dso<=120,note:'✅ verificato (Allianz Trade)'},
+  ];
+  document.getElementById('bench-list').innerHTML=rows.map(r=>{
+    const c=r.ok?'var(--gn)':r.warn?'var(--am)':'var(--rd)';
+    return`<div class="bench-row"><div class="dot" style="background:${c}"></div><div><div class="bench-lbl">${r.l}</div><div class="bench-note">${r.note}</div></div><div class="bench-val" style="color:${c}">${r.v||'—'}</div><div class="bench-ref">benchmark: ${r.ref}</div></div>`;
+  }).join('');
+}
+
+// inizializza flag personale visibilità
+document.getElementById('cs-flag-amm-wrap').style.display='block';
+
+renderDashboard();
+</script>
+</body>
+</html>
