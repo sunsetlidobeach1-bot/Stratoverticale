@@ -479,6 +479,11 @@ function calcAz(){
     });
   });
   dso=dsoWTot>0?Math.round(dsoWSum/dsoWTot):(fat>0?Math.round(sni/fat*365):0);
+  // DEBUG
+  console.log('[calcAz] S.commesse.length=',S.commesse.length);
+  S.commesse.forEach(c=>console.log(' ',c.nome,'sal_voci:',c.sal_voci.map(v=>({imp:v.importo,data:v.data,scadenza:v.scadenza||'(mancante)'})),'inc_voci:',c.incassato_voci.map(v=>v.data)));
+  console.log('[calcAz] dsoWSum=',dsoWSum,'dsoWTot=',dsoWTot,'→ dso=',dso,'fat=',fat,'fatP=',fatP);
+  // END DEBUG
   // struttura senza personale amm per benchmark
   const strBench=strP-strPAmm;
   const strBenchPct=fatP>0?strBench/fatP*100:0;
