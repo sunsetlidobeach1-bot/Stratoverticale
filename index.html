@@ -933,7 +933,12 @@ function renderBenchmark(){
 document.getElementById('cs-flag-amm-wrap').style.display='block';
 
 function seedDemoData(){
-  if(localStorage.getItem('sv3'))return;
+  if(localStorage.getItem('sv3')){
+    try{
+      const d=JSON.parse(localStorage.getItem('sv3'));
+      if((d.commesse||[]).some(c=>(c.sal_voci||[]).length>0||(c.incassato_voci||[]).length>0))return;
+    }catch(e){}
+  }
   S.commesse=[
     {
       id:'demo001',nome:'Ristrutturazione Villa Colombo',
